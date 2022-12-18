@@ -181,6 +181,11 @@ public class EchoServer extends AbstractServer {
 						  break;
 					  }
 			  	  }
+				  String username = (String)data.getContent();
+				  String password = dbController.ConnectToServer(username);
+				  response.setContent(password);
+				  response.setCommand(Command.Connect);
+				  client.sendToClient(response);
 			  	  break;
 	
 			  case Disconnect:
