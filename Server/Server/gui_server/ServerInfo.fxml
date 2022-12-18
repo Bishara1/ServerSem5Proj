@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- hello -->
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.effect.Blend?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="532.0" prefWidth="787.0" style="-fx-background-color: #e2effd;" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui_server.ServerInfoController">
+   <children>
+      <Label layoutX="59.0" layoutY="93.0" text="Server Configuration" textFill="#4246a1">
+         <font>
+            <Font name="System Bold Italic" size="23.0" />
+         </font>
+      </Label>
+      <Label layoutX="59.0" layoutY="177.0" prefHeight="2.0" prefWidth="19.0" text="IP:" textFill="#4246a1">
+         <font>
+            <Font name="System Bold Italic" size="15.0" />
+         </font></Label>
+      <TextField fx:id="serverIptxt" layoutX="139.0" layoutY="172.0" prefHeight="31.0" prefWidth="161.0" />
+      <Button layoutX="69.0" layoutY="320.0" mnemonicParsing="false" onAction="#RunServerBtn" prefHeight="45.0" prefWidth="225.0" style="-fx-background-color: #5d74a2;" text="Start Server" textFill="WHITE">
+         <font>
+            <Font size="21.0" />
+         </font></Button>
+      <TableView fx:id="table" editable="true" layoutX="339.0" layoutY="142.0" prefHeight="345.0" prefWidth="420.0">
+        <columns>
+          <TableColumn fx:id="colIp" prefWidth="140.0" text="IP" />
+          <TableColumn fx:id="colHost" prefWidth="140.0" text="HOST" />
+            <TableColumn fx:id="colStatus" prefWidth="140.0" text="STATUS" />
+        </columns>
+      </TableView>
+      <Label graphicTextGap="7.0" layoutX="300.0" layoutY="14.0" prefHeight="53.0" prefWidth="188.0" text="Server Info" textFill="#4246a1">
+         <font>
+            <Font name="System Bold Italic" size="36.0" />
+         </font>
+         <effect>
+            <Blend />
+         </effect>
+      </Label>
+      <Label layoutX="452.0" layoutY="93.0" text="Connected Clients" textFill="#4246a1">
+         <font>
+            <Font name="System Bold Italic" size="23.0" />
+         </font>
+      </Label>
+      <Button layoutX="69.0" layoutY="439.0" mnemonicParsing="false" onAction="#QuitBtn" prefHeight="36.0" prefWidth="225.0" style="-fx-background-color: #5d74a2;" text="Quit" textFill="WHITE">
+         <font>
+            <Font size="21.0" />
+         </font>
+      </Button>
+      <Label layoutX="59.0" layoutY="225.0" prefHeight="21.0" prefWidth="37.0" text="Port:" textFill="#4246a1">
+         <font>
+            <Font name="System Bold Italic" size="15.0" />
+         </font>
+      </Label>
+      <TextField fx:id="serverPortxt" layoutX="139.0" layoutY="220.0" prefHeight="31.0" prefWidth="161.0" />
+      <Button layoutX="69.0" layoutY="380.0" mnemonicParsing="false" onAction="#RefreshClientsBtn" prefHeight="36.0" prefWidth="225.0" style="-fx-background-color: #5d74a2;" text="Refresh Clients" textFill="WHITE">
+         <font>
+            <Font size="21.0" />
+         </font>
+      </Button>
+      <Label layoutX="59.0" layoutY="271.0" prefHeight="21.0" prefWidth="77.0" text="Password:" textFill="#4246a1">
+         <font>
+            <Font name="System Bold Italic" size="15.0" />
+         </font>
+      </Label>
+      <PasswordField fx:id="databasePasswordtxt" layoutX="139.0" layoutY="266.0" prefHeight="31.0" prefWidth="161.0" />
+   </children>
+</AnchorPane>
