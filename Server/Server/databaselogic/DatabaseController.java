@@ -112,8 +112,9 @@ public class DatabaseController {
 			{
 				stmt = conn.createStatement();
 				ResultSet rs = stmt.executeQuery("SELECT password FROM subscriber Where user_name = \""+ username +"\"");
-		 		rs.next();
-				password = rs.getString(1);
+		 		if(!rs.next())
+		 			return "";
+				password = rs.getString(1); //check if username exists lol I forgor :skull_emoji:
 		 		
 				rs.close();
 			} catch (SQLException e) { e.printStackTrace(); }
