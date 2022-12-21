@@ -103,6 +103,7 @@ public class EchoServer extends AbstractServer {
   protected void clientConnected(ConnectionToClient client) {
 //	  ArrayList<String> info = new ArrayList<>();
 //	  info.add(client.getInetAddress().toString());
+	  System.out.println("Connected");
   	
   }
   
@@ -134,13 +135,12 @@ public class EchoServer extends AbstractServer {
     try {
       sv.listen(); //Start listening for connections
     } 
-    catch (Exception ex) 
-    {
+    catch (Exception ex)  {
       System.out.println("ERROR - Could not listen for clients!");
     }
   }
   
-  
+ 
   /**
    * @param data
    * @param client
@@ -190,6 +190,7 @@ public class EchoServer extends AbstractServer {
 						  break;
 					  }
 				  }
+				  
 			  	  response.setCommand(Command.Disconnect);
 			  	  client.sendToClient(response);
 			  	  break;

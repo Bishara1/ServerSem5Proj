@@ -78,7 +78,6 @@ public class ServerInfoController implements Initializable {
 //				// TODO Auto-generated method stub
 //				initialize(null, null);
 //			}
-//			
 //		});
 	
 	
