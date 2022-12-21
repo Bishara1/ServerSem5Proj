@@ -105,6 +105,23 @@ public class DatabaseController {
 			return alldatabase;
 	   }
 	  
+	  public String ConnectToServer(String username) throws SQLException {
+			Statement stmt;
+			String password = null;
+			try 
+			{
+				stmt = conn.createStatement();
+				ResultSet rs = stmt.executeQuery("SELECT password FROM subscriber Where user_name = \""+ username +"\"");
+		 		if(!rs.next())
+		 			return "";
+				password = rs.getString(1); //check if username exists lol I forgor :skull_emoji:
+		 		
+				rs.close();
+			} catch (SQLException e) { e.printStackTrace(); }
+			
+			return password;
+	   }
+	  
 	   public static synchronized DatabaseController GetFunctionsInstance(String databasePassword) {
 		   return ( DBFunctionsInstance == null ) ? new DatabaseController(databasePassword) : DBFunctionsInstance;
 	   }
