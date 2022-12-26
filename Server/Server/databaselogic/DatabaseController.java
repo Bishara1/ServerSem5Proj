@@ -43,7 +43,7 @@ public class DatabaseController {
 	  public void SaveToDB(Object message) throws SQLException {
 			PreparedStatement ps = conn.prepareStatement("INSERT INTO subscriber "
 					+ "(first_name, last_name, id, phone_number, email_address,"
-					+ " credit_card_number, subscriber_number,user_name,password) VALUES (?, ?, ?, ?, ?, ?, ?,?,?)");
+					+ " credit_card_number, subscriber_number,user_name,password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
 			ArrayList<String> data = (ArrayList<String>) message;
 			
 			try 
