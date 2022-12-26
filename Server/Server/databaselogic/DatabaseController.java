@@ -41,7 +41,7 @@ public class DatabaseController {
 	  
 	  @SuppressWarnings("unchecked")
 	  public void SaveToDB(Object message) throws SQLException {
-			PreparedStatement ps = conn.prepareStatement("INSERT INTO subscriber "
+			PreparedStatement ps = conn.prepareStatement("INSERT INTO users "
 					+ "(first_name, last_name, id, phone_number, email_address,"
 					+ " credit_card_number, subscriber_number,user_name,password) VALUES (?, ?, ?, ?, ?, ?, ?,?,?)");
 			ArrayList<String> data = (ArrayList<String>) message;
@@ -57,7 +57,7 @@ public class DatabaseController {
 	 
 	  public void UpdateToDB(String[] details) throws SQLException {
 		    // data format = { id credit_card subscriber_num}
-			PreparedStatement ps = conn.prepareStatement("UPDATE subscriber "
+			PreparedStatement ps = conn.prepareStatement("UPDATE users "
 					+ "Set credit_card_number = ?, subscriber_number = ? "
 					+ "Where id = ?");
 			
@@ -72,12 +72,16 @@ public class DatabaseController {
 	  
 	  public ArrayList<Subscriber> ReadFromDB() throws SQLException {
 			Statement stmt;
+			if(true)
+			{
+				//ADD THINGS LOL
+			}
 			Subscriber tempSub = new Subscriber(null, null, null, null, null, null, null,null,null);
 			ArrayList<Subscriber> alldatabase = new ArrayList<>();
 			try 
 			{
 				stmt = conn.createStatement();
-				ResultSet rs = stmt.executeQuery("SELECT * FROM subscriber");
+				ResultSet rs = stmt.executeQuery("SELECT * FROM users");
 		 		while(rs.next())
 		 		{
 		 			// get details from database
@@ -111,7 +115,7 @@ public class DatabaseController {
 			try 
 			{
 				stmt = conn.createStatement();
-				ResultSet rs = stmt.executeQuery("SELECT password FROM subscriber Where user_name = \""+ username +"\"");
+				ResultSet rs = stmt.executeQuery("SELECT password FROM users Where user_name = \""+ username +"\"");
 		 		if(!rs.next())
 		 			return "";
 				password = rs.getString(1); //check if username exists lol I forgor :skull_emoji:
