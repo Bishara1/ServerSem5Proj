@@ -10,11 +10,16 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 import logic.Connected;
+import logic.Delivery;
+import logic.Machine;
+import logic.Order;
 import logic.Subscriber;
+import logic.Request;
 import databaselogic.DatabaseController;
 import ocsf.server.*;
 import common.Command;
 import common.Message;
+
 
 /**
  * This class overrides some of the methods in the abstract 
@@ -103,6 +108,7 @@ public class EchoServer extends AbstractServer {
   protected void clientConnected(ConnectionToClient client) {
 //	  ArrayList<String> info = new ArrayList<>();
 //	  info.add(client.getInetAddress().toString());
+	  System.out.println("Connected");
   	
   }
   
@@ -134,13 +140,12 @@ public class EchoServer extends AbstractServer {
     try {
       sv.listen(); //Start listening for connections
     } 
-    catch (Exception ex) 
-    {
+    catch (Exception ex)  {
       System.out.println("ERROR - Could not listen for clients!");
     }
   }
   
-  
+ 
   /**
    * @param data
    * @param client
@@ -149,6 +154,7 @@ public class EchoServer extends AbstractServer {
    */
   public void ParseClientData(Message data, ConnectionToClient client) throws IOException {
 	  Message response = new Message(null, null);
+	  ArrayList<Object> GottenDatabase;
 	  
 	  try {
 		  switch(data.getCommand()) {
@@ -157,16 +163,6 @@ public class EchoServer extends AbstractServer {
 				  dbController.UpdateToDB(detailsToDB);
 				  
 				  response.setCommand(Command.DatabaseUpdate);
-				  client.sendToClient(response);
-				  break;
-	
-			  case DatabaseRead:
-				  response.setCommand(Command.DatabaseRead);
-				  
-				  ArrayList<Subscriber> allDatabase = new ArrayList<Subscriber>();
-				  allDatabase.addAll(dbController.ReadFromDB());
-				  response.setContent(allDatabase);
-				  
 				  client.sendToClient(response);
 				  break;
 	
@@ -181,6 +177,7 @@ public class EchoServer extends AbstractServer {
 						  break;
 					  }
 			  	  }
+				  
 				  String username = (String)data.getContent();
 				  String password = dbController.ConnectToServer(username);
 				  response.setContent(password);
@@ -195,9 +192,71 @@ public class EchoServer extends AbstractServer {
 						  break;
 					  }
 				  }
+				  
 			  	  response.setCommand(Command.Disconnect);
 			  	  client.sendToClient(response);
 			  	  break;
+			  	  
+			   case ReadMachines:
+				   response.setCommand(Command.ReadMachines);
+				   GottenDatabase = dbController.ReadFromDB(data);
+
+				   ArrayList<Machine> machines = new ArrayList<>();
+				   
+				   for (Object obj : GottenDatabase) {
+					   machines.add((Machine) obj);
+				   }
+				   
+				   response.setContent(machines);
+				  
+				   client.sendToClient(response);
+				   break;
+				   
+			    case ReadDeliveries:
+				   response.setCommand(Command.ReadDeliveries);
+				   
+				   GottenDatabase = dbController.ReadFromDB(data);
+				   ArrayList<Delivery> deliveries = new ArrayList<>();
+				   
+				   for (Object obj : GottenDatabase) {
+					   deliveries.add((Delivery) obj);
+				   }
+				   
+				   response.setContent(deliveries);
+				  
+				   client.sendToClient(response);
+				   break;
+				   
+			    case ReadOrders:
+					   response.setCommand(Command.ReadOrders);
+					   
+					   GottenDatabase = dbController.ReadFromDB(data);
+					   ArrayList<Order> orders = new ArrayList<>();
+					   
+					   for (Object obj : GottenDatabase) {
+						   orders.add((Order) obj);
+					   }
+					   
+					   response.setContent(orders);
+					  
+					   client.sendToClient(response);
+					   break;
+					   
+			    case ReadRequests:
+					   response.setCommand(Command.ReadRequests);
+					   
+					   GottenDatabase = dbController.ReadFromDB(data);
+					   ArrayList<Request> requests = new ArrayList<>();
+					   
+					   for (Object obj : GottenDatabase) {
+						   requests.add((Request) obj);
+					   }
+					   
+					   response.setContent(requests);
+					  
+					   client.sendToClient(response);
+					   break;
+					  
 			 default:
 				 break;  // add functionality
 		 }  

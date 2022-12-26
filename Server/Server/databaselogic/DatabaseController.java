@@ -8,6 +8,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
+import common.Message;
+import logic.Machine;
 import logic.Subscriber;
 
 //This Class is built using Singleton design pattern
@@ -43,7 +45,7 @@ public class DatabaseController {
 	  public void SaveToDB(Object message) throws SQLException {
 			PreparedStatement ps = conn.prepareStatement("INSERT INTO users "
 					+ "(first_name, last_name, id, phone_number, email_address,"
-					+ " credit_card_number, subscriber_number,user_name,password) VALUES (?, ?, ?, ?, ?, ?, ?,?,?)");
+					+ " credit_card_number, subscriber_number,user_name,password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
 			ArrayList<String> data = (ArrayList<String>) message;
 			
 			try 
@@ -70,39 +72,40 @@ public class DatabaseController {
 			} catch (SQLException e) { e.printStackTrace(); }
 		}
 	  
-	  public ArrayList<Subscriber> ReadFromDB() throws SQLException {
-			Statement stmt;
-			Subscriber tempSub = new Subscriber(null, null, null, null, null, null, null,null,null);
-			ArrayList<Subscriber> alldatabase = new ArrayList<>();
-			try 
-			{
-				stmt = conn.createStatement();
-				ResultSet rs = stmt.executeQuery("SELECT * FROM users");
-		 		while(rs.next())
-		 		{
-		 			// get details from database
-		 			tempSub.setFname(rs.getString(1));
-		 			tempSub.setLName(rs.getString(2));
-		 			tempSub.setId(rs.getString(3));
-		 			tempSub.setPhoneNum(rs.getString(4));
-		 			tempSub.setEmail(rs.getString(5));
-		 			tempSub.setVisa(rs.getString(6));
-		 			tempSub.setSubNum(rs.getString(7));
-		 			tempSub.setUserName(rs.getString(8));
-		 			tempSub.setPassword(rs.getString(9));
-		 			
-		 			//add it to the database arraylist
-		 			alldatabase.add(tempSub);
-		 			
-		 			// create new object
-		 			tempSub = new Subscriber(null, null, null, null, null, null, null,null,null);
 
-				}
-		 		
-				rs.close();
-			} catch (SQLException e) { e.printStackTrace(); }
+
+	  public ArrayList<Object> ReadFromDB(Message m) throws SQLException {
+		    Statement stmt;
+			ArrayList<Object> alldata = new ArrayList<>();
+			String query = m.getCommand().GetQuery();
 			
-			return alldatabase;
+			if ((int)m.getContent() != 0)
+				query += " WHERE " + m.getCommand().GetID() + " = " + (int)m.getContent();
+			
+			try {
+				stmt = conn.createStatement();
+				ResultSet rs = stmt.executeQuery(query);
+				
+				switch (m.getCommand()) {
+					case ReadMachines:
+						Machine tempM = new Machine();
+						while(rs.next()) { 
+							tempM.setMachine_id(Integer.parseInt(rs.getString(1)));
+							tempM.setLocation(rs.getString(2));
+							tempM.setThreshold(Integer.parseInt(rs.getString(3)));
+							tempM.setTotal_inventory(Integer.parseInt(rs.getString(4)));
+							tempM.setItems(rs.getString(5));
+							tempM.setAmount_per_item(rs.getString(6));
+							alldata.add(tempM);
+							tempM = new Machine();
+						}
+						break;
+				}
+				rs.close();
+			}
+			catch (SQLException e) {e.printStackTrace(); }
+			
+			return alldata;
 	   }
 	  
 	  public String ConnectToServer(String username) throws SQLException {
