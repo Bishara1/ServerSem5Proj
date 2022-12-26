@@ -43,7 +43,7 @@ public class DatabaseController {
 	  
 	  @SuppressWarnings("unchecked")
 	  public void SaveToDB(Object message) throws SQLException {
-			PreparedStatement ps = conn.prepareStatement("INSERT INTO subscriber "
+			PreparedStatement ps = conn.prepareStatement("INSERT INTO users "
 					+ "(first_name, last_name, id, phone_number, email_address,"
 					+ " credit_card_number, subscriber_number,user_name,password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
 			ArrayList<String> data = (ArrayList<String>) message;
@@ -59,7 +59,7 @@ public class DatabaseController {
 	 
 	  public void UpdateToDB(String[] details) throws SQLException {
 		    // data format = { id credit_card subscriber_num}
-			PreparedStatement ps = conn.prepareStatement("UPDATE subscriber "
+			PreparedStatement ps = conn.prepareStatement("UPDATE users "
 					+ "Set credit_card_number = ?, subscriber_number = ? "
 					+ "Where id = ?");
 			
@@ -72,6 +72,7 @@ public class DatabaseController {
 			} catch (SQLException e) { e.printStackTrace(); }
 		}
 	  
+
 	  public ArrayList<Object> ReadFromDB(Message m) throws SQLException {
 		    Statement stmt;
 			ArrayList<Object> alldata = new ArrayList<>();
@@ -80,8 +81,7 @@ public class DatabaseController {
 			if ((int)m.getContent() != 0)
 				query += " WHERE " + m.getCommand().GetID() + " = " + (int)m.getContent();
 			
-			try
-			{
+			try {
 				stmt = conn.createStatement();
 				ResultSet rs = stmt.executeQuery(query);
 				
@@ -96,11 +96,9 @@ public class DatabaseController {
 							tempM.setItems(rs.getString(5));
 							tempM.setAmount_per_item(rs.getString(6));
 							alldata.add(tempM);
-							tempM = null;
+							tempM = new Machine();
 						}
 						break;
-						
-//					case ReadDelivery:
 				}
 				rs.close();
 			}
@@ -115,7 +113,7 @@ public class DatabaseController {
 			try 
 			{
 				stmt = conn.createStatement();
-				ResultSet rs = stmt.executeQuery("SELECT password FROM subscriber Where user_name = \""+ username +"\"");
+				ResultSet rs = stmt.executeQuery("SELECT password FROM users Where user_name = \""+ username +"\"");
 		 		if(!rs.next())
 		 			return "";
 				password = rs.getString(1); //check if username exists lol I forgor :skull_emoji:
