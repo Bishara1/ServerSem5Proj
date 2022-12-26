@@ -72,10 +72,6 @@ public class DatabaseController {
 	  
 	  public ArrayList<Subscriber> ReadFromDB() throws SQLException {
 			Statement stmt;
-			if(true)
-			{
-				//ADD THINGS LOL
-			}
 			Subscriber tempSub = new Subscriber(null, null, null, null, null, null, null,null,null);
 			ArrayList<Subscriber> alldatabase = new ArrayList<>();
 			try 
