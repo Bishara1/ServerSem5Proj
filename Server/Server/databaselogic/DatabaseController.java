@@ -9,8 +9,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 
 import common.Message;
-import logic.Machine;
-import logic.Subscriber;
+import logic.*;
 
 //This Class is built using Singleton design pattern
 public class DatabaseController {
@@ -87,18 +86,81 @@ public class DatabaseController {
 				
 				switch (m.getCommand()) {
 					case ReadMachines:
-						Machine tempM = new Machine();
+						Machine tempM;
 						while(rs.next()) { 
-							tempM.setMachine_id(Integer.parseInt(rs.getString(1)));
+							tempM = new Machine();
+							tempM.setMachine_id(rs.getInt(1));
 							tempM.setLocation(rs.getString(2));
-							tempM.setThreshold(Integer.parseInt(rs.getString(3)));
-							tempM.setTotal_inventory(Integer.parseInt(rs.getString(4)));
-							tempM.setItems(rs.getString(5));
+							tempM.setThreshold(rs.getInt(3));
+							tempM.setTotal_inventory(rs.getInt(4));
+							tempM.setAllItems(rs.getString(5));
 							tempM.setAmount_per_item(rs.getString(6));
 							alldata.add(tempM);
-							tempM = new Machine();
 						}
 						break;
+						
+					case ReadDeliveries:
+						Delivery tempD;
+						while(rs.next()) {
+							tempD = new Delivery();
+							tempD.setDelivery_id(rs.getInt(1));
+							tempD.setOrder_id(rs.getInt(2));
+							tempD.setShipping_date(rs.getDate(3));
+							tempD.setEstimated_dleivery(rs.getDate(4));
+							tempD.setStatus(rs.getString(5));
+							alldata.add(tempD);
+						}
+						break;
+						
+					case ReadRequests:
+						Request tempR;
+						while(rs.next()) {
+							tempR = new Request();
+							tempR.setRequest_id(rs.getInt(1));
+							tempR.setCustomer_id(rs.getInt(2));
+							tempR.setType(rs.getString(3));
+							alldata.add(tempR);
+						}
+						break;
+						
+					case ReadUsers:
+						Subscriber tempSub;
+						while(rs.next()) {
+							tempSub = new Subscriber();
+							tempSub.setFname(rs.getString(1));
+							tempSub.setLName(rs.getString(2));
+							tempSub.setId(rs.getInt(3));
+							tempSub.setPhoneNum(rs.getString(4));
+							tempSub.setEmail(rs.getString(5));
+							tempSub.setVisa(rs.getString(6));
+							tempSub.setSubNum(rs.getInt(7));
+							tempSub.setUserName(rs.getString(8));
+							tempSub.setPassword(rs.getString(9));
+							tempSub.setRole(rs.getString(10));
+							alldata.add(tempSub);
+						}
+						break;
+						
+					case ReadOrders:
+						Order tempO;
+						while(rs.next()) {
+							tempO = new Order();
+							tempO.setOrder_num(rs.getInt(1));
+							tempO.setCustomer_id(rs.getInt(2));
+							tempO.setOrder_status(rs.getString(3));
+							tempO.setOrder_created(rs.getDate(4));
+							tempO.setConfirmation_date(rs.getDate(5));
+							tempO.setLocation(rs.getString(6));
+							tempO.setItems_in_order(rs.getString(7));
+							tempO.setPrice(rs.getInt(8));
+							tempO.setSupply_method(rs.getString(9));
+							alldata.add(tempO);
+						}
+						break;
+						
+					default:
+						return null;
+							
 				}
 				rs.close();
 			}

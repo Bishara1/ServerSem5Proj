@@ -208,7 +208,10 @@ public class EchoServer extends AbstractServer {
 				   }
 				   
 				   response.setContent(machines);
-				  
+				   for (Machine m : machines) {
+					   System.out.print(m.getMachine_id());
+					   System.out.println(m.getAllItems());
+				   }
 				   client.sendToClient(response);
 				   break;
 				   
@@ -253,7 +256,6 @@ public class EchoServer extends AbstractServer {
 					   }
 					   
 					   response.setContent(requests);
-					  
 					   client.sendToClient(response);
 					   break;
 					  
