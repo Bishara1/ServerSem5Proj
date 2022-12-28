@@ -159,6 +159,17 @@ public class DatabaseController {
 						}
 						break;
 						
+					case ReadItems:
+						Item tempI;
+						while(rs.next()) {
+							tempI = new Item();
+							tempI.setProductID(rs.getString(1));
+							tempI.setPrice(rs.getInt(2));
+							alldata.add(tempI);
+						}
+						break;
+						
+						
 					default:
 						return null;
 							
