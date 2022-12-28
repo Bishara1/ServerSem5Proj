@@ -69,6 +69,7 @@ public class EchoServer extends AbstractServer {
 	  
 		System.out.println("Message received: " + msg + " from " + client);
 		try {
+		
 			ParseClientData(data, client);
 		} 
 		//catch (SQLException e) {e.printStackTrace();} 
@@ -198,20 +199,19 @@ public class EchoServer extends AbstractServer {
 			  	  break;
 			  	  
 			   case ReadMachines:
+				 
 				   response.setCommand(Command.ReadMachines);
-				   GottenDatabase = dbController.ReadFromDB(data);
-
+				 
+				   GottenDatabase = dbController.ReadFromDB(data);//alldata - ArrayList<Object>
+				  
 				   ArrayList<Machine> machines = new ArrayList<>();
 				   
 				   for (Object obj : GottenDatabase) {
 					   machines.add((Machine) obj);
 				   }
-				   
+				 
 				   response.setContent(machines);
-				   for (Machine m : machines) {
-					   System.out.print(m.getMachine_id());
-					   System.out.println(m.getAllItems());
-				   }
+				   //loop was taking too long -> looked like it was crashing
 				   client.sendToClient(response);
 				   break;
 				   

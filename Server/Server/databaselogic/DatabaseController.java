@@ -9,6 +9,9 @@ import java.sql.Statement;
 import java.util.ArrayList;
 
 import common.Message;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
 import logic.*;
 
 //This Class is built using Singleton design pattern
@@ -83,7 +86,11 @@ public class DatabaseController {
 			try {
 				stmt = conn.createStatement();
 				ResultSet rs = stmt.executeQuery(query);
-				
+				if(!rs.next()) {
+					alldata.add(null);
+					return alldata;
+		 			}
+				rs = stmt.executeQuery(query);
 				switch (m.getCommand()) {
 					case ReadMachines:
 						Machine tempM;
