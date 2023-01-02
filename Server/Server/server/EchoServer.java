@@ -179,6 +179,13 @@ public class EchoServer extends AbstractServer {
 						  break;
 					  }
 			  	  }
+				  if(found == false)
+				  {
+					  String[] ip = client.toString().split(" ");
+					  users.add(new Connected(ip[0],String.valueOf(this.getPort()),"Connected"));
+					  
+				  }
+					  
 				  
 				  String username = (String)data.getContent();
 				  String password = dbController.ConnectToServer(username);
