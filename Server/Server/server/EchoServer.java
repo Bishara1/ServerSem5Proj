@@ -208,8 +208,10 @@ public class EchoServer extends AbstractServer {
 			  	  
 			   case ReadMachines:
 				 
+				  
 				   response.setCommand(Command.ReadMachines);
 				 
+				   
 				   GottenDatabase = dbController.ReadFromDB(data);//alldata - ArrayList<Object>
 				  
 				   ArrayList<Machine> machines = new ArrayList<>();
@@ -218,6 +220,7 @@ public class EchoServer extends AbstractServer {
 					   machines.add((Machine) obj);
 				   }
 				 
+				   
 				   response.setContent(machines);
 				   //loop was taking too long -> looked like it was crashing
 				   client.sendToClient(response);

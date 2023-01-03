@@ -3,7 +3,7 @@ package gui_server;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-
+import databaselogic.DatabaseController;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -31,8 +31,8 @@ public class ServerInfoController implements Initializable {
 	private PasswordField databasePasswordtxt;
 	
 //	@FXML
-//	private TextArea screen;
-//	private static String msg;
+//	public TextArea screen;
+//	public static String msg;
 	
 	@FXML
 	private TableView<Connected> table;
@@ -45,19 +45,17 @@ public class ServerInfoController implements Initializable {
 	
 	private ObservableList<Connected> data;
 	
-	
+   
 	public void start(Stage primaryStage) throws Exception {
 		// get port and initialize port text field
-//		msg = "";
 		String port = Integer.toString(EchoServer.DEFAULT_PORT);
 		
 		//FXMLLoader loader = new FXMLLoader();
 		Parent root = FXMLLoader.load(getClass().getResource("/gui_server/ServerInfo.fxml"));
-		
+	
 		Scene scene = new Scene(root);
 		primaryStage.setTitle("Server Info");
 		primaryStage.setScene(scene);
-		
 		primaryStage.show();
 	}
 	
@@ -66,7 +64,6 @@ public class ServerInfoController implements Initializable {
 		serverIptxt.setText(EchoServer.getLocalIp());  // Set current ip
 		serverPortxt.setText("5555");
 		databasePasswordtxt.setText("sfnhli147258!");
-//		PrintConsole("waiting");
 		LoadTable();
 
 		/*
@@ -113,8 +110,8 @@ public class ServerInfoController implements Initializable {
 	}
 	
 //	public void PrintConsole(String msg1) {
-//		msg += msg1;
-//		screen.setText(msg);
+//		screen.appendText(msg1 + "\n");
+//			
 //	}
 	
 	public void QuitBtn() {
