@@ -188,21 +188,23 @@ public class DatabaseController {
 			return alldata;
 	   }
 	  
-	  public String ConnectToServer(String username) throws SQLException {
+	  public String[] ConnectToServer(String username) throws SQLException {
 			Statement stmt;
 			String password = null;
+			String[] passRole = new String[2];
 			try 
 			{
 				stmt = conn.createStatement();
-				ResultSet rs = stmt.executeQuery("SELECT password FROM users Where user_name = \""+ username +"\"");
+				ResultSet rs = stmt.executeQuery("SELECT password,role FROM users Where user_name = \""+ username +"\"");
 		 		if(!rs.next())
-		 			return "";
-				password = rs.getString(1); //check if username exists lol I forgor :skull_emoji:
-		 		
+		 			return new String[] {"",""};
+				passRole[0] = rs.getString(1); //check if username exists lol I forgor :skull_emoji:
+		 		passRole[1] = rs.getString(2);
+				
 				rs.close();
 			} catch (SQLException e) { e.printStackTrace(); }
 			
-			return password;
+			return passRole;
 	   }
 	  
 	   public static synchronized DatabaseController GetFunctionsInstance(String databasePassword) {
