@@ -14,6 +14,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
@@ -29,6 +30,10 @@ public class ServerInfoController implements Initializable {
 	@FXML
 	private PasswordField databasePasswordtxt;
 	
+//	@FXML
+//	private TextArea screen;
+//	private static String msg;
+	
 	@FXML
 	private TableView<Connected> table;
 	@FXML
@@ -43,6 +48,7 @@ public class ServerInfoController implements Initializable {
 	
 	public void start(Stage primaryStage) throws Exception {
 		// get port and initialize port text field
+//		msg = "";
 		String port = Integer.toString(EchoServer.DEFAULT_PORT);
 		
 		//FXMLLoader loader = new FXMLLoader();
@@ -60,6 +66,7 @@ public class ServerInfoController implements Initializable {
 		serverIptxt.setText(EchoServer.getLocalIp());  // Set current ip
 		serverPortxt.setText("5555");
 		databasePasswordtxt.setText("sfnhli147258!");
+//		PrintConsole("waiting");
 		LoadTable();
 
 		/*
@@ -104,6 +111,11 @@ public class ServerInfoController implements Initializable {
 		colHost.setCellValueFactory(new PropertyValueFactory<>("Host"));
 		colStatus.setCellValueFactory(new PropertyValueFactory<>("Status"));
 	}
+	
+//	public void PrintConsole(String msg1) {
+//		msg += msg1;
+//		screen.setText(msg);
+//	}
 	
 	public void QuitBtn() {
 		System.exit(0);

@@ -1,6 +1,7 @@
 package databaselogic;
 
 import java.sql.Connection;
+
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -9,6 +10,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 
 import common.Message;
+import gui_server.ServerInfoController;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
@@ -34,7 +36,8 @@ public class DatabaseController {
 	      
 	      try 
 	      {
-	          conn = DriverManager.getConnection("jdbc:mysql://localhost/ekrut?serverTimezone=IST", "root", databasePassword);
+//	          conn = DriverManager.getConnection("jdbc:mysql://localhost/ekrut?serverTimezone=IST", "root", databasePassword);
+	          conn = DriverManager.getConnection("jdbc:mysql://localhost/ekrut?serverTimezone=IST", "root", "Tareez1234");
 	          System.out.println("SQL connection succeed");
 	   	  } catch (SQLException ex)  { /* handle any errors*/
 				System.out.println("SQLException: " + ex.getMessage());
