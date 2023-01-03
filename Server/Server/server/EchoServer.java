@@ -283,13 +283,16 @@ public class EchoServer extends AbstractServer {
 			    case ReadUsers:
 			    		response.setCommand(Command.ReadUsers);
 			    		GottenDatabase = dbController.ReadFromDB(data);
-			    		ArrayList<Subscriber> users = new ArrayList<>();
+			    		ArrayList<Subscriber> user = new ArrayList<>();
 						   
 						   for (Object obj : GottenDatabase) {
-							   users.add((Subscriber) obj);
+							   user.add((Subscriber) obj);
 						   }
+						   response.setContent(user);
+						   client.sendToClient(response);
+						   break;
 			    default:
-			    			break;  // add functionality
+			    		break;  // add functionality
 		 }  
 	  } catch(SQLException e) {e.printStackTrace();}
   }
