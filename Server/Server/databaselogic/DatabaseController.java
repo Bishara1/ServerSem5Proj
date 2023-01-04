@@ -57,7 +57,7 @@ public class DatabaseController {
 		  	
 			PreparedStatement ps = conn.prepareStatement("INSERT INTO users "
 					+ "(first_name, last_name, id, phone_number, email_address,"
-					+ " credit_card_number, subscriber_number,user_name,password,role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+					+ " credit_card_number, subscriber_number,user_name,password,role,is_new_subscriber) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
 		  	
 			ArrayList<String> data = (ArrayList<String>) msg.getContent();
 			
@@ -66,6 +66,7 @@ public class DatabaseController {
 				for (int i = 1; i < 10; i++)
 					ps.setString(i, data.get(i-1));
 				ps.setString(10,"customer");
+				ps.setInt(11, 0);
 				
 				ps.executeQuery();
 			} catch (SQLException e) { e.printStackTrace(); }
