@@ -59,7 +59,7 @@ public class DatabaseController {
 					+ "(first_name, last_name, id, phone_number, email_address,"
 					+ " credit_card_number, subscriber_number,user_name,password,role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
 		  	
-			ArrayList<String> data = (ArrayList<String>) message;
+			ArrayList<String> data = (ArrayList<String>) msg.getContent();
 			
 			try 
 			{
