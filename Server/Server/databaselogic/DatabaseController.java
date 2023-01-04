@@ -223,7 +223,7 @@ public class DatabaseController {
 				ResultSet rs = stmt.executeQuery("SELECT password,role,first_name FROM users Where user_name = \""+ username +"\"");
 		 		if(!rs.next())
 		 			return new String[] {"","",""};
-				passRoleFname[0] = rs.getString(1); //check if username exists lol I forgor :skull_emoji:
+				passRoleFname[0] = rs.getString(1);
 		 		passRoleFname[1] = rs.getString(2);
 		 		passRoleFname[2] = rs.getString(3);
 				
