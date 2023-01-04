@@ -39,7 +39,7 @@ public class DatabaseController {
 	      try 
 	      {
 //	          conn = DriverManager.getConnection("jdbc:mysql://localhost/ekrut?serverTimezone=IST", "root", databasePassword);
-	          conn = DriverManager.getConnection("jdbc:mysql://localhost/ekrut?serverTimezone=IST", "root", "Tareez1234");
+	          conn = DriverManager.getConnection("jdbc:mysql://localhost/ekrut?serverTimezone=IST", "root", databasePassword);
 	          System.out.println("SQL connection succeed");
 	   	  } catch (SQLException ex)  { /* handle any errors*/
 				System.out.println("SQLException: " + ex.getMessage());
