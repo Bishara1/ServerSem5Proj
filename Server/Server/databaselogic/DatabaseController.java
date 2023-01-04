@@ -193,8 +193,19 @@ public class DatabaseController {
 						}
 						break;
 						
+					case ReadLocations:
+						Location tempL;
+						while(rs.next()) {
+							tempL = new Location();
+							tempL.setLocation(rs.getString(1));
+							tempL.setSale_value(rs.getInt(2));
+							alldata.add(tempL);
+						}
+						break;
+						
 						
 					default:
+						System.out.println("Dude what");
 						return null;
 							
 				}
