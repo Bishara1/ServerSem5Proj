@@ -81,7 +81,7 @@ public class DatabaseController {
 			ArrayList<Object> alldata = new ArrayList<>();
 			String query = m.getCommand().GetQuery();
 			
-			if ((int)m.getContent() != 0)
+			if ((int)m.getContent() != 0) //Content has to be ID?
 				query += " WHERE " + m.getCommand().GetID() + " = " + (int)m.getContent();
 			
 			try {
@@ -162,6 +162,7 @@ public class DatabaseController {
 							tempO.setItems_in_order(rs.getString(7));
 							tempO.setPrice(rs.getInt(8));
 							tempO.setSupply_method(rs.getString(9));
+							tempO.setMachine_id(rs.getInt(10));
 							alldata.add(tempO);
 						}
 						break;
@@ -191,20 +192,21 @@ public class DatabaseController {
 	  public String[] ConnectToServer(String username) throws SQLException {
 			Statement stmt;
 			String password = null;
-			String[] passRole = new String[2];
+			String[] passRoleFname = new String[3];
 			try 
 			{
 				stmt = conn.createStatement();
-				ResultSet rs = stmt.executeQuery("SELECT password,role FROM users Where user_name = \""+ username +"\"");
+				ResultSet rs = stmt.executeQuery("SELECT password,role,first_name FROM users Where user_name = \""+ username +"\"");
 		 		if(!rs.next())
-		 			return new String[] {"",""};
-				passRole[0] = rs.getString(1); //check if username exists lol I forgor :skull_emoji:
-		 		passRole[1] = rs.getString(2);
+		 			return new String[] {"","",""};
+				passRoleFname[0] = rs.getString(1); //check if username exists lol I forgor :skull_emoji:
+		 		passRoleFname[1] = rs.getString(2);
+		 		passRoleFname[2] = rs.getString(3);
 				
 				rs.close();
 			} catch (SQLException e) { e.printStackTrace(); }
 			
-			return passRole;
+			return passRoleFname;
 	   }
 	  
 	   public static synchronized DatabaseController GetFunctionsInstance(String databasePassword) {

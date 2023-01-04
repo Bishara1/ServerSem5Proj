@@ -188,8 +188,8 @@ public class EchoServer extends AbstractServer {
 					  
 				  
 				  String username = (String)data.getContent();
-				  String[] passRole = dbController.ConnectToServer(username);
-				  response.setContent(passRole);
+				  String[] passRoleFname = dbController.ConnectToServer(username);
+				  response.setContent(passRoleFname);
 				  response.setCommand(Command.Connect);
 				  client.sendToClient(response);
 			  	  break;
