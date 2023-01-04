@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
+import common.Command;
 import common.Message;
 import gui_server.ServerInfoController;
 import javafx.scene.control.Alert;
@@ -50,15 +51,21 @@ public class DatabaseController {
 	  
 	  @SuppressWarnings("unchecked")
 	  public void SaveToDB(Object message) throws SQLException {
+		  
+		  	Message msg = (Message)message;
+		  	
+		  	
 			PreparedStatement ps = conn.prepareStatement("INSERT INTO users "
 					+ "(first_name, last_name, id, phone_number, email_address,"
-					+ " credit_card_number, subscriber_number,user_name,password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+					+ " credit_card_number, subscriber_number,user_name,password,role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+		  	
 			ArrayList<String> data = (ArrayList<String>) message;
 			
 			try 
 			{
 				for (int i = 1; i < 10; i++)
 					ps.setString(i, data.get(i-1));
+				ps.setString(10,"customer");
 				
 				ps.executeQuery();
 			} catch (SQLException e) { e.printStackTrace(); }
