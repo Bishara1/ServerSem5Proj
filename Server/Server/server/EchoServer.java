@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import logic.Connected;
 import logic.Delivery;
 import logic.Item;
+import logic.Location;
 import logic.Machine;
 import logic.Order;
 import logic.Subscriber;
@@ -294,6 +295,19 @@ public class EchoServer extends AbstractServer {
 						   response.setContent(user);
 						   client.sendToClient(response);
 						   break;
+						   
+			    case ReadLocations:
+			    	response.setCommand(Command.ReadLocations);
+			    	GottenDatabase = dbController.ReadFromDB(data);
+			    	ArrayList<Location> locations = new ArrayList<>();
+			    	
+			    	for (Object obj : GottenDatabase)
+			    		locations.add((Location) obj);
+			    	
+			    	response.setContent(locations);
+			    	client.sendToClient(response);
+			    	break;
+			    	
 			    default:
 			    		break;  // add functionality
 		 }  
