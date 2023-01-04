@@ -159,15 +159,31 @@ public class EchoServer extends AbstractServer {
 	  ArrayList<Object> GottenDatabase;
 	  
 	  try {
-		  switch(data.getCommand()) {
+		  switch(data.getCommand()) 
+		  {
+		  
 			  case DatabaseUpdate:
 				  String[] detailsToDB = ((String)data.getContent()).split(" "); // get content
 				  dbController.UpdateToDB(detailsToDB);
-				  
 				  response.setCommand(Command.DatabaseUpdate);
 				  client.sendToClient(response);
 				  break;
 	
+			  case InsertUser:
+				  Message m = new Message(null, null);
+				  String[] insertToDB = ((String)data.getContent()).split(" ");
+				  ArrayList<String> toDB=new ArrayList<>();
+				  for(String s: insertToDB)
+				  {
+					  toDB.add(s);
+				  }
+				  m.setContent(toDB);
+				  dbController.SaveToDB(m);
+				  response.setCommand(Command.InsertUser);
+				  client.sendToClient(response);
+				  break;
+				 
+				  
 			  case Connect:
 				  boolean found = false;
 				  ArrayList<Subscriber> temp = new ArrayList<Subscriber>();

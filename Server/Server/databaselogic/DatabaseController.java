@@ -39,7 +39,6 @@ public class DatabaseController {
 	      
 	      try 
 	      {
-//	          conn = DriverManager.getConnection("jdbc:mysql://localhost/ekrut?serverTimezone=IST", "root", databasePassword);
 	          conn = DriverManager.getConnection("jdbc:mysql://localhost/ekrut?serverTimezone=IST", "root", databasePassword);
 	          System.out.println("SQL connection succeed");
 	   	  } catch (SQLException ex)  { /* handle any errors*/
@@ -57,17 +56,19 @@ public class DatabaseController {
 		  	
 			PreparedStatement ps = conn.prepareStatement("INSERT INTO users "
 					+ "(first_name, last_name, id, phone_number, email_address,"
-					+ " credit_card_number, subscriber_number,user_name,password,role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-		  	
+					+ " credit_card_number, subscriber_number,user_name,password,role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,?)");
 			ArrayList<String> data = (ArrayList<String>) msg.getContent();
-			
 			try 
 			{
-				for (int i = 1; i < 10; i++)
+				for (int i = 1; i < 11; i++)
+				{	if ((i==3) || (i==7))
+						ps.setInt(i, Integer.parseInt(data.get(i-1)));
+				else
 					ps.setString(i, data.get(i-1));
-				ps.setString(10,"customer");
+				}
 				
-				ps.executeQuery();
+//				ps.executeQuery();
+				ps.executeUpdate();
 			} catch (SQLException e) { e.printStackTrace(); }
 		}
 	 
@@ -93,11 +94,8 @@ public class DatabaseController {
 			ArrayList<Object> alldata = new ArrayList<>();
 			String query = m.getCommand().GetQuery();
 		
-			
-			
 			if ((int)m.getContent() != 0) 
 				query += " WHERE " + m.getCommand().GetID() + " = " + (int)m.getContent();
-			
 			
 			try {
 				stmt = conn.createStatement();
@@ -111,7 +109,6 @@ public class DatabaseController {
 					case ReadMachines:
 						Machine tempM;
 						while(rs.next()) { 
-							
 							tempM = new Machine();
 							tempM.setMachine_id(rs.getInt(1));
 							tempM.setLocation(rs.getString(2));
