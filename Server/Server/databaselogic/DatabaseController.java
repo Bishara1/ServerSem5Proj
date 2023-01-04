@@ -1,6 +1,7 @@
 package databaselogic;
 
 import java.sql.Connection;
+
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -9,6 +10,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 
 import common.Message;
+import gui_server.ServerInfoController;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
@@ -18,12 +20,14 @@ import logic.*;
 public class DatabaseController {
 	  private Connection conn;
 	  private static DatabaseController DBFunctionsInstance = null;  // only one instance (singleton)
+	 
 	
 	  private DatabaseController(String dbpassword) {
 		  ConnectToDB(dbpassword);
 	  }
 	
-	  public void ConnectToDB(String databasePassword) {
+	
+	public void ConnectToDB(String databasePassword) {
 		  try {
 		      Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
 		      System.out.println("Driver definition succeed");
@@ -34,7 +38,8 @@ public class DatabaseController {
 	      
 	      try 
 	      {
-	          conn = DriverManager.getConnection("jdbc:mysql://localhost/ekrut?serverTimezone=IST", "root", databasePassword);
+//	          conn = DriverManager.getConnection("jdbc:mysql://localhost/ekrut?serverTimezone=IST", "root", databasePassword);
+	          conn = DriverManager.getConnection("jdbc:mysql://localhost/ekrut?serverTimezone=IST", "root", "Tareez1234");
 	          System.out.println("SQL connection succeed");
 	   	  } catch (SQLException ex)  { /* handle any errors*/
 				System.out.println("SQLException: " + ex.getMessage());
@@ -80,9 +85,12 @@ public class DatabaseController {
 		    Statement stmt;
 			ArrayList<Object> alldata = new ArrayList<>();
 			String query = m.getCommand().GetQuery();
+		
 			
-			if ((int)m.getContent() != 0) //Content has to be ID?
+			
+			if ((int)m.getContent() != 0) 
 				query += " WHERE " + m.getCommand().GetID() + " = " + (int)m.getContent();
+			
 			
 			try {
 				stmt = conn.createStatement();
@@ -96,6 +104,7 @@ public class DatabaseController {
 					case ReadMachines:
 						Machine tempM;
 						while(rs.next()) { 
+							
 							tempM = new Machine();
 							tempM.setMachine_id(rs.getInt(1));
 							tempM.setLocation(rs.getString(2));

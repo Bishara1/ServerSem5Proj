@@ -3,7 +3,7 @@ package gui_server;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-
+import databaselogic.DatabaseController;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -14,6 +14,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
@@ -29,6 +30,10 @@ public class ServerInfoController implements Initializable {
 	@FXML
 	private PasswordField databasePasswordtxt;
 	
+//	@FXML
+//	public TextArea screen;
+//	public static String msg;
+	
 	@FXML
 	private TableView<Connected> table;
 	@FXML
@@ -40,18 +45,17 @@ public class ServerInfoController implements Initializable {
 	
 	private ObservableList<Connected> data;
 	
-	
+   
 	public void start(Stage primaryStage) throws Exception {
 		// get port and initialize port text field
 		String port = Integer.toString(EchoServer.DEFAULT_PORT);
 		
 		//FXMLLoader loader = new FXMLLoader();
 		Parent root = FXMLLoader.load(getClass().getResource("/gui_server/ServerInfo.fxml"));
-		
+	
 		Scene scene = new Scene(root);
 		primaryStage.setTitle("Server Info");
 		primaryStage.setScene(scene);
-		
 		primaryStage.show();
 	}
 	
@@ -104,6 +108,11 @@ public class ServerInfoController implements Initializable {
 		colHost.setCellValueFactory(new PropertyValueFactory<>("Host"));
 		colStatus.setCellValueFactory(new PropertyValueFactory<>("Status"));
 	}
+	
+//	public void PrintConsole(String msg1) {
+//		screen.appendText(msg1 + "\n");
+//			
+//	}
 	
 	public void QuitBtn() {
 		System.exit(0);
