@@ -294,6 +294,14 @@ public class EchoServer extends AbstractServer {
 						   response.setContent(user);
 						   client.sendToClient(response);
 						   break;
+						   
+			    case InsertOrder:
+		    		response.setCommand(Command.InsertOrder);
+		    		response.setContent(0);
+		    		dbController.SaveToDB(data);
+					client.sendToClient(response);
+					break;
+						   
 			    default:
 			    		break;  // add functionality
 		 }  

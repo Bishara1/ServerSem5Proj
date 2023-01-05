@@ -1,12 +1,14 @@
 package databaselogic;
 
 import java.sql.Connection;
-
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 import common.Command;
@@ -49,27 +51,60 @@ public class DatabaseController {
 	   	  }
 	  }
 	  
-	  @SuppressWarnings("unchecked")
+	  
 	  public void SaveToDB(Object message) throws SQLException {
 		  
+		  	PreparedStatement ps;
+		  
 		  	Message msg = (Message)message;
+		  	ArrayList<String> data = (ArrayList<String>) msg.getContent();
+		  	switch(msg.getCommand()) {
+		  	case InsertUser:
+		  		ps = conn.prepareStatement("INSERT INTO users "
+						+ "(first_name, last_name, id, phone_number, email_address,"
+						+ " credit_card_number, subscriber_number,user_name,password,role,is_new_subscriber) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+		  		try 
+				{
+					for (int i = 1; i < 11; i++)
+						ps.setString(i, data.get(i-1));
+					ps.setInt(11, 0);
+					
+					ps.executeUpdate();
+				} catch (SQLException e) { e.printStackTrace(); }
+		  		break;
+		  		
+		  	case InsertOrder:
+		  		System.out.println(data);
+		  		ps = conn.prepareStatement("INSERT INTO orders "
+						+ "(order_number, customer_id, order_status, order_created, confirmation_date,"
+						+ " location, items_in_order,price,supply_method,machine_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+		  		try 
+				{
+					ps.setInt(1, getLastId("orders", Command.ReadOrders));
+					ps.setInt(2, Integer.parseInt(data.get(0))); //bruh we cant add the id of the customer cuz its a FK in DB
+					ps.setString(3, "Pending");
+					ps.setDate(4, Date.valueOf(LocalDate.now()));
+					ps.setDate(5, null);
+					ps.setString(6, data.get(1));
+					ps.setString(7, data.get(2));
+					ps.setInt(8, Integer.parseInt(data.get(3)));
+					ps.setString(9, data.get(4));
+					ps.setInt(10, Integer.parseInt(data.get(5)));
+					ps.executeUpdate();
+					
+				} catch (SQLException e) { e.printStackTrace(); }
+		  		break;
+		  		
+		  	default:
+		  		break;
+		  	}
 		  	
 		  	
-			PreparedStatement ps = conn.prepareStatement("INSERT INTO users "
-					+ "(first_name, last_name, id, phone_number, email_address,"
-					+ " credit_card_number, subscriber_number,user_name,password,role,is_new_subscriber) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
 		  	
-			ArrayList<String> data = (ArrayList<String>) msg.getContent();
+		  	
 			
-			try 
-			{
-				for (int i = 1; i < 10; i++)
-					ps.setString(i, data.get(i-1));
-				ps.setString(10,"customer");
-				ps.setInt(11, 0);
-				
-				ps.executeQuery();
-			} catch (SQLException e) { e.printStackTrace(); }
+			
+			
 		}
 	 
 	  public void UpdateToDB(String[] details) throws SQLException {
@@ -228,5 +263,25 @@ public class DatabaseController {
 	  
 	   public static synchronized DatabaseController GetFunctionsInstance(String databasePassword) {
 		   return ( DBFunctionsInstance == null ) ? new DatabaseController(databasePassword) : DBFunctionsInstance;
+	   }
+	   
+	   public int getLastId(String tableName, Command cmd) throws SQLException
+	   {
+		   String query = "SELECT " + cmd.GetID() + " FROM " + tableName; 
+		   Statement stmt;
+		   stmt = conn.createStatement();
+		   ResultSet rs = stmt.executeQuery(query);
+		   ArrayList<Integer> ID = new ArrayList<Integer>();
+		   while(rs.next())
+			   ID.add(rs.getInt(1));
+		   int lastID = 0;
+		   for(Integer id : ID)
+		   {
+			   if(id > lastID)
+				   lastID = id;
+		   }
+		   lastID++;
+		   return lastID;
+		   
 	   }
 }
