@@ -41,7 +41,6 @@ public class DatabaseController {
 	      
 	      try 
 	      {
-//	          conn = DriverManager.getConnection("jdbc:mysql://localhost/ekrut?serverTimezone=IST", "root", databasePassword);
 	          conn = DriverManager.getConnection("jdbc:mysql://localhost/ekrut?serverTimezone=IST", "root", databasePassword);
 	          System.out.println("SQL connection succeed");
 	   	  } catch (SQLException ex)  { /* handle any errors*/
@@ -60,18 +59,21 @@ public class DatabaseController {
 		  	ArrayList<String> data = (ArrayList<String>) msg.getContent();
 		  	switch(msg.getCommand()) {
 		  	case InsertUser:
-		  		ps = conn.prepareStatement("INSERT INTO users "
+		  	ps = conn.prepareStatement("INSERT INTO users "
 						+ "(first_name, last_name, id, phone_number, email_address,"
-						+ " credit_card_number, subscriber_number,user_name,password,role,is_new_subscriber) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-		  		try 
+						+ " credit_card_number, subscriber_number,user_name,password,role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,?)");
+				try 
 				{
 					for (int i = 1; i < 11; i++)
+					{	if ((i==3) || (i==7))
+							ps.setInt(i, Integer.parseInt(data.get(i-1)));
+					else
 						ps.setString(i, data.get(i-1));
-					ps.setInt(11, 0);
+					}
 					
+//					ps.executeQuery();
 					ps.executeUpdate();
 				} catch (SQLException e) { e.printStackTrace(); }
-		  		break;
 		  		
 		  	case InsertOrder:
 		  		System.out.println(data);
@@ -99,12 +101,8 @@ public class DatabaseController {
 		  		break;
 		  	}
 		  	
-		  	
-		  	
-		  	
 			
-			
-			
+
 		}
 	 
 	  public void UpdateToDB(String[] details) throws SQLException {
@@ -129,11 +127,8 @@ public class DatabaseController {
 			ArrayList<Object> alldata = new ArrayList<>();
 			String query = m.getCommand().GetQuery();
 		
-			
-			
 			if ((int)m.getContent() != 0) 
 				query += " WHERE " + m.getCommand().GetID() + " = " + (int)m.getContent();
-			
 			
 			try {
 				stmt = conn.createStatement();
@@ -147,7 +142,6 @@ public class DatabaseController {
 					case ReadMachines:
 						Machine tempM;
 						while(rs.next()) { 
-							
 							tempM = new Machine();
 							tempM.setMachine_id(rs.getInt(1));
 							tempM.setLocation(rs.getString(2));
@@ -229,8 +223,19 @@ public class DatabaseController {
 						}
 						break;
 						
+					case ReadLocations:
+						Location tempL;
+						while(rs.next()) {
+							tempL = new Location();
+							tempL.setLocation(rs.getString(1));
+							tempL.setSale_value(rs.getInt(2));
+							alldata.add(tempL);
+						}
+						break;
+						
 						
 					default:
+						System.out.println("Dude what");
 						return null;
 							
 				}
@@ -251,7 +256,7 @@ public class DatabaseController {
 				ResultSet rs = stmt.executeQuery("SELECT password,role,first_name FROM users Where user_name = \""+ username +"\"");
 		 		if(!rs.next())
 		 			return new String[] {"","",""};
-				passRoleFname[0] = rs.getString(1); //check if username exists lol I forgor :skull_emoji:
+				passRoleFname[0] = rs.getString(1);
 		 		passRoleFname[1] = rs.getString(2);
 		 		passRoleFname[2] = rs.getString(3);
 				
