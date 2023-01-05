@@ -15,6 +15,7 @@ import logic.Item;
 import logic.Location;
 import logic.Machine;
 import logic.Order;
+import logic.OrdersReports;
 import logic.Subscriber;
 import logic.Request;
 import databaselogic.DatabaseController;
@@ -202,8 +203,6 @@ public class EchoServer extends AbstractServer {
 					  users.add(new Connected(ip[0],String.valueOf(this.getPort()),"Connected"));
 					  
 				  }
-					  
-				  
 				  String username = (String)data.getContent();
 				  String[] passRoleFname = dbController.ConnectToServer(username);
 				  response.setContent(passRoleFname);
@@ -224,20 +223,13 @@ public class EchoServer extends AbstractServer {
 			  	  break;
 			  	  
 			   case ReadMachines:
-				 
-				  
 				   response.setCommand(Command.ReadMachines);
-				 
-				   
 				   GottenDatabase = dbController.ReadFromDB(data);//alldata - ArrayList<Object>
-				  
 				   ArrayList<Machine> machines = new ArrayList<>();
 				   
 				   for (Object obj : GottenDatabase) {
 					   machines.add((Machine) obj);
 				   }
-				 
-				   
 				   response.setContent(machines);
 				   //loop was taking too long -> looked like it was crashing
 				   client.sendToClient(response);
@@ -330,6 +322,20 @@ public class EchoServer extends AbstractServer {
 			    	response.setContent(locations);
 			    	client.sendToClient(response);
 			    	break;
+
+			    	
+			    case ReadOrdersReports:
+			    	response.setCommand(Command.ReadOrdersReports);
+			    	GottenDatabase = dbController.ReadFromDB(data);
+			    	
+			    	ArrayList<OrdersReports> reports = new ArrayList<>();
+			    	for(Object obj : GottenDatabase)
+			    		reports.add((OrdersReports)obj);
+			    	
+			    	response.setContent(reports);
+			    	client.sendToClient(response);
+			    	break;
+
 			    default:
 			    		break;  // add functionality
 		 }  

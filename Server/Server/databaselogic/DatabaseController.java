@@ -232,7 +232,21 @@ public class DatabaseController {
 							alldata.add(tempL);
 						}
 						break;
-						
+					
+					case ReadOrdersReports:
+						OrdersReports tempRorders;
+						while(rs.next())
+						{
+							tempRorders = new OrdersReports();
+							tempRorders.setReport_id(rs.getString(1));
+							tempRorders.setMachine_id(rs.getString(2));
+							tempRorders.setLocation(rs.getString(3));
+							tempRorders.setData(rs.getString(4));
+							tempRorders.setMonth(rs.getString(5));
+							tempRorders.setYear(rs.getString(6));
+							alldata.add(tempRorders);
+						}
+						break;
 						
 					default:
 						System.out.println("Dude what");
