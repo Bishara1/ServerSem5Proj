@@ -61,6 +61,8 @@ public class DatabaseController {
 		  	Message msg = (Message)message;
 		  	ArrayList<String> data = (ArrayList<String>) msg.getContent();
 		  	
+		  	
+		  	
 		  	switch(msg.getCommand()) {
 		  	case InsertUser:
 		  	ps = conn.prepareStatement("INSERT INTO users "
@@ -83,21 +85,40 @@ public class DatabaseController {
 		  		ps = conn.prepareStatement("INSERT INTO orders "
 						+ "(order_number, customer_id, order_status, order_created, confirmation_date,"
 						+ " location, items_in_order,price,supply_method,machine_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+//		  		try 
+//				{
+//					ps.setInt(1, getLastId("orders", Command.ReadOrders));
+//					ps.setInt(2, Integer.parseInt(data.get(0))); //bruh we cant add the id of the customer cuz its a FK in DB
+//					ps.setString(3, "Pending");
+//					ps.setDate(4, Date.valueOf(LocalDate.now()));
+//					ps.setDate(5, null);
+//					ps.setString(6, data.get(1));
+//					ps.setString(7, data.get(2));
+//					ps.setInt(8, Integer.parseInt(data.get(3)));
+//					ps.setString(9, data.get(4));
+//					ps.setInt(10, Integer.parseInt(data.get(5)));
+//					ps.executeUpdate();
+//					
+//				} catch (SQLException e) { e.printStackTrace(); }
+		  		
 		  		try 
 				{
-					ps.setInt(1, getLastId("orders", Command.ReadOrders));
-					ps.setInt(2, Integer.parseInt(data.get(0))); //bruh we cant add the id of the customer cuz its a FK in DB
-					ps.setString(3, "Pending");
-					ps.setDate(4, Date.valueOf(LocalDate.now()));
-					ps.setDate(5, null);
-					ps.setString(6, data.get(1));
-					ps.setString(7, data.get(2));
-					ps.setInt(8, Integer.parseInt(data.get(3)));
-					ps.setString(9, data.get(4));
-					ps.setInt(10, Integer.parseInt(data.get(5)));
-					ps.executeUpdate();
+		  			for (Order order : data) {
+						ps.setInt(1, getLastId("orders", Command.ReadOrders));  //wtf should we do with this
+						ps.setInt(2, order.getCustomer_id()); 
+						ps.setString(3, order.getOrder_status());
+						ps.setDate(4, order.getOrder_created());
+						ps.setDate(5, Date.valueOf(LocalDate.now()));
+						ps.setString(6, order.getLocation());
+						ps.setString(7, order.getItems_in_order());
+						ps.setInt(8, order.getPrice());
+						ps.setString(9, order.getSupply_method());
+						ps.setInt(10, order.getMachine_id());
+						ps.executeUpdate();
+		  			}
 					
 				} catch (SQLException e) { e.printStackTrace(); }
+		  		
 		  		break;
 		  		
 		  	case InsertOrderReport:
