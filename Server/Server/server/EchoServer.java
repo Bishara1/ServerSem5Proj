@@ -170,6 +170,13 @@ public class EchoServer extends AbstractServer {
 				  response.setCommand(Command.DatabaseUpdate);
 				  client.sendToClient(response);
 				  break;
+				  
+			  case UpdateMachineStock:
+				  ArrayList<String> update = ((ArrayList<String>)data.getContent()); // get content
+				  dbController.UpdateToDB(update);
+				  response.setCommand(Command.UpdateMachineStock);
+				  client.sendToClient(response);
+				  break;
 	
 			  case InsertUser:
 				  Message m = new Message(null, null);

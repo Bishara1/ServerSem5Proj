@@ -95,6 +95,25 @@ public class DatabaseController {
 					ps.executeUpdate();
 					
 				} catch (SQLException e) { e.printStackTrace(); }
+		  		
+		  		ps = conn.prepareStatement("INSERT INTO orders "
+						+ "(order_number, customer_id, order_status, order_created, confirmation_date,"
+						+ " location, items_in_order,price,supply_method,machine_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+		  		try 
+				{
+					ps.setInt(1, getLastId("orders", Command.ReadOrders));
+					ps.setInt(2, Integer.parseInt(data.get(0))); //bruh we cant add the id of the customer cuz its a FK in DB
+					ps.setString(3, "Pending");
+					ps.setDate(4, Date.valueOf(LocalDate.now()));
+					ps.setDate(5, null);
+					ps.setString(6, data.get(1));
+					ps.setString(7, data.get(2));
+					ps.setInt(8, Integer.parseInt(data.get(3)));
+					ps.setString(9, data.get(4));
+					ps.setInt(10, Integer.parseInt(data.get(5)));
+					ps.executeUpdate();
+					
+				} catch (SQLException e) { e.printStackTrace(); }
 		  		break;
 		  		
 		  	default:
