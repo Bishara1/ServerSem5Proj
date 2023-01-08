@@ -165,10 +165,19 @@ public class EchoServer extends AbstractServer {
 		  {
 		  
 			  case DatabaseUpdate:
-				  String[] detailsToDB = ((String)data.getContent()).split(" "); // get content
-				  dbController.UpdateToDB(detailsToDB);
+				  ArrayList<String> change = (ArrayList<String>) data.getContent();
+				  String str = "";
+					for(int i = 0;i<change.size();i++)
+					{
+						str += change.get(i);
+						str += "|";
+					}
+					
+				  String[] detailsToDB = str.split("\\|"); // get content -> ["tableName","id","data"]
+				  Message msg = new Message(detailsToDB,data.getCommand());
+				  dbController.UpdateToDB(msg);
 				  response.setCommand(Command.DatabaseUpdate);
-				  client.sendToClient(response);
+				  client.sendToClient(response); //tableName,id,whatToUpdate
 				  break;
 				  
 			  case UpdateMachineStock:
@@ -317,6 +326,13 @@ public class EchoServer extends AbstractServer {
 		    		dbController.SaveToDB(data);
 					client.sendToClient(response);
 					break;
+					
+			    case InsertOrderReport:
+			    	response.setCommand(Command.InsertOrderReport);
+			    	response.setContent(0);
+			    	dbController.SaveToDB(data);
+			    	client.sendToClient(response);
+			    	break;
 						  
 			    case ReadLocations:
 			    	response.setCommand(Command.ReadLocations);

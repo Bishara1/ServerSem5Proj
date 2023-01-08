@@ -1,6 +1,8 @@
 package databaselogic;
 
 import java.sql.Connection;
+
+
 import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -11,6 +13,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
+//import Client.ChatClient;
 import common.Command;
 import common.Message;
 import gui_server.ServerInfoController;
@@ -57,6 +60,7 @@ public class DatabaseController {
 		  
 		  	Message msg = (Message)message;
 		  	ArrayList<String> data = (ArrayList<String>) msg.getContent();
+		  	
 		  	switch(msg.getCommand()) {
 		  	case InsertUser:
 		  	ps = conn.prepareStatement("INSERT INTO users "
@@ -76,7 +80,6 @@ public class DatabaseController {
 				} catch (SQLException e) { e.printStackTrace(); }
 		  		
 		  	case InsertOrder:
-		  		System.out.println(data);
 		  		ps = conn.prepareStatement("INSERT INTO orders "
 						+ "(order_number, customer_id, order_status, order_created, confirmation_date,"
 						+ " location, items_in_order,price,supply_method,machine_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
@@ -114,6 +117,23 @@ public class DatabaseController {
 					ps.executeUpdate();
 					
 				} catch (SQLException e) { e.printStackTrace(); }
+		  		break;
+		  		
+		  	case InsertOrderReport:
+		  		ps = conn.prepareStatement("INSERT INTO ordersreport "
+						+ "(report_id, machine_id, location, data, month, year)"
+						+ " VALUES (?, ?, ?, ?, ?, ?)");
+		  		try 
+		  		{
+		  			ps.setString(1, String.valueOf(getLastId("ordersreport", Command.InsertOrderReport)));
+		  			ps.setString(2, data.get(1));
+		  			ps.setString(3, data.get(2));
+		  			ps.setString(4, data.get(3));
+		  			ps.setString(5, data.get(4));
+		  			ps.setString(6, data.get(5));
+		  			ps.executeUpdate();
+		  			
+		  		} catch (Exception e) {	e.printStackTrace();}
 		  		break;
 		  		
 		  	default:
@@ -124,19 +144,33 @@ public class DatabaseController {
 
 		}
 	 
-	  public void UpdateToDB(String[] details) throws SQLException {
+	  public void UpdateToDB(Message details) throws SQLException {
 		    // data format = { id credit_card subscriber_num}
-			PreparedStatement ps = conn.prepareStatement("UPDATE users "
-					+ "Set credit_card_number = ?, subscriber_number = ? "
-					+ "Where id = ?");
-			
+		 String[] s = (String[]) details.getContent();
+		 String TableName = s[0];
+		  switch (TableName)
+		  {
+		case "ordersreport":
+			PreparedStatement ps = conn.prepareStatement("UPDATE ordersreport "
+					+ "Set data = ?"
+					+ "Where report_id = ?");
 			try {
-				ps.setString(1, details[1]);  // credit_card
-				ps.setString(2, details[2]);  // subscriber_number
-				ps.setString(3, details[0]);  // id
-				
+				ps.setString(1, s[2]);
+				ps.setString(2, s[1]);
+			
 				ps.executeUpdate();
 			} catch (SQLException e) { e.printStackTrace(); }
+			break;
+
+		default:
+			System.out.println("default entered");
+			break;
+		}
+//			PreparedStatement ps = conn.prepareStatement("UPDATE users "
+//					+ "Set credit_card_number = ?, subscriber_number = ? "
+//					+ "Where id = ?");
+			
+			
 		}
 	  
 
