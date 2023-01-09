@@ -36,6 +36,7 @@ import common.Message;
  */
 public class EchoServer extends AbstractServer { 
 	private DatabaseController dbController;
+	public static boolean isConnectedToDatabase = false;
 	public static ArrayList<Connected> users = new ArrayList<Connected>();
 	private static String databasePassword = null;
   //Class variables *************************************************
@@ -97,6 +98,9 @@ public class EchoServer extends AbstractServer {
    */
   protected void serverStarted() {
 	  dbController = DatabaseController.GetFunctionsInstance(databasePassword);
+	  if (dbController.IsConnectedToDB())
+		  isConnectedToDatabase = true;
+	  
 	  System.out.println("Server listening for connections on port " + getPort());
   }
   
@@ -113,11 +117,9 @@ public class EchoServer extends AbstractServer {
 //	  ArrayList<String> info = new ArrayList<>();
 //	  info.add(client.getInetAddress().toString());
 	  System.out.println("Connected");
-  	
   }
   
 
-  
   //Class methods ***************************************************
   
   /**
@@ -149,7 +151,7 @@ public class EchoServer extends AbstractServer {
     }
   }
   
- 
+  
   /**
    * @param data
    * @param client
@@ -352,8 +354,17 @@ public class EchoServer extends AbstractServer {
 			    	client.sendToClient(response);
 			    	break;
 
+			    case UpdateOrders:
+			    	response.setCommand(Command.UpdateOrders);
+			    	response.setContent(null);
+			    	dbController.SaveToDB(data);
+			    	
+			    	client.sendToClient(response);
+			    	break;
+			    	
 			    default:
-			    		break;  // add functionality
+			    	System.out.println("I am stuck at default case in echoserver");
+		    		break;  // add functionality
 		 }  
 	  } catch(SQLException e) {e.printStackTrace();}
   }

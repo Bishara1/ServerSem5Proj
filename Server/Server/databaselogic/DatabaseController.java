@@ -25,21 +25,30 @@ import logic.*;
 //This Class is built using Singleton design pattern
 public class DatabaseController {
 	  private Connection conn;
+	  private boolean isConnectedToDB = false;
 	  private static DatabaseController DBFunctionsInstance = null;  // only one instance (singleton)
 	 
 	
 	  private DatabaseController(String dbpassword) {
 		  ConnectToDB(dbpassword);
 	  }
+	  
+	  public boolean IsConnectedToDB() {
+		  return isConnectedToDB;
+	  }
 	
 	
 	public void ConnectToDB(String databasePassword) {
+		  boolean noErrors = true;
+		  if (isConnectedToDB)
+			  return;
 		  try {
 		      Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
 		      System.out.println("Driver definition succeed");
 		  } catch (Exception ex) {
 			  /* handle the error*/
 			  System.out.println("Driver definition failed");
+			  noErrors = false;
 	      }
 	      
 	      try 
@@ -50,100 +59,98 @@ public class DatabaseController {
 				System.out.println("SQLException: " + ex.getMessage());
 				System.out.println("SQLState: " + ex.getSQLState());
 				System.out.println("VendorError: " + ex.getErrorCode());
+				noErrors = false;
 	   	  }
+	      
+	      if(noErrors)
+	    	  isConnectedToDB = true;
 	  }
 	  
-	  
+	 @SuppressWarnings("unchecked")
 	  public void SaveToDB(Object message) throws SQLException {
-		  
 		  	PreparedStatement ps;
-		  
 		  	Message msg = (Message)message;
-		  	ArrayList<String> data = (ArrayList<String>) msg.getContent();
-		  	
-		  	
 		  	
 		  	switch(msg.getCommand()) {
-		  	case InsertUser:
-		  	ps = conn.prepareStatement("INSERT INTO users "
-						+ "(first_name, last_name, id, phone_number, email_address,"
-						+ " credit_card_number, subscriber_number,user_name,password,role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,?)");
-				try 
-				{
-					for (int i = 1; i < 11; i++)
-					{	if ((i==3) || (i==7))
-							ps.setInt(i, Integer.parseInt(data.get(i-1)));
-					else
-						ps.setString(i, data.get(i-1));
-					}
-					
-//					ps.executeQuery();
-					ps.executeUpdate();
-				} catch (SQLException e) { e.printStackTrace(); }
-		  		
-		  	case InsertOrder:
-		  		ps = conn.prepareStatement("INSERT INTO orders "
-						+ "(order_number, customer_id, order_status, order_created, confirmation_date,"
-						+ " location, items_in_order,price,supply_method,machine_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-//		  		try 
-//				{
-//					ps.setInt(1, getLastId("orders", Command.ReadOrders));
-//					ps.setInt(2, Integer.parseInt(data.get(0))); //bruh we cant add the id of the customer cuz its a FK in DB
-//					ps.setString(3, "Pending");
-//					ps.setDate(4, Date.valueOf(LocalDate.now()));
-//					ps.setDate(5, null);
-//					ps.setString(6, data.get(1));
-//					ps.setString(7, data.get(2));
-//					ps.setInt(8, Integer.parseInt(data.get(3)));
-//					ps.setString(9, data.get(4));
-//					ps.setInt(10, Integer.parseInt(data.get(5)));
-//					ps.executeUpdate();
-//					
-//				} catch (SQLException e) { e.printStackTrace(); }
-		  		
-		  		try 
-				{
-		  			for (Order order : data) {
-						ps.setInt(1, getLastId("orders", Command.ReadOrders));  //wtf should we do with this
-						ps.setInt(2, order.getCustomer_id()); 
-						ps.setString(3, order.getOrder_status());
-						ps.setDate(4, order.getOrder_created());
-						ps.setDate(5, Date.valueOf(LocalDate.now()));
-						ps.setString(6, order.getLocation());
-						ps.setString(7, order.getItems_in_order());
-						ps.setInt(8, order.getPrice());
-						ps.setString(9, order.getSupply_method());
-						ps.setInt(10, order.getMachine_id());
+			  	case InsertUser:
+			  		ArrayList<String> data = (ArrayList<String>) msg.getContent();
+				  	ps = conn.prepareStatement("INSERT INTO users "
+								+ "(first_name, last_name, id, phone_number, email_address,"
+								+ " credit_card_number, subscriber_number,user_name,password,role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,?)");
+					try 
+					{
+						for (int i = 1; i < 11; i++)
+						{	if ((i==3) || (i==7))
+								ps.setInt(i, Integer.parseInt(data.get(i-1)));
+						else
+							ps.setString(i, data.get(i-1));
+						}
+						
+	//					ps.executeQuery();
 						ps.executeUpdate();
-		  			}
-					
-				} catch (SQLException e) { e.printStackTrace(); }
-		  		
-		  		break;
-		  		
-		  	case InsertOrderReport:
-		  		ps = conn.prepareStatement("INSERT INTO ordersreport "
-						+ "(report_id, machine_id, location, data, month, year)"
-						+ " VALUES (?, ?, ?, ?, ?, ?)");
-		  		try 
-		  		{
-		  			ps.setString(1, String.valueOf(getLastId("ordersreport", Command.InsertOrderReport)));
-		  			ps.setString(2, data.get(1));
-		  			ps.setString(3, data.get(2));
-		  			ps.setString(4, data.get(3));
-		  			ps.setString(5, data.get(4));
-		  			ps.setString(6, data.get(5));
-		  			ps.executeUpdate();
-		  			
-		  		} catch (Exception e) {	e.printStackTrace();}
-		  		break;
-		  		
-		  	default:
-		  		break;
+					} catch (SQLException e) { e.printStackTrace(); }
+					break;
+			  		
+			  	case InsertOrder:
+			  		ArrayList<String> dataOrder = (ArrayList<String>) msg.getContent();
+			  		ps = conn.prepareStatement("INSERT INTO orders "
+							+ "(order_number, customer_id, order_status, order_created, confirmation_date,"
+							+ " location, items_in_order,price,supply_method,machine_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+			  		try 
+					{
+						ps.setInt(1, getLastId("orders", Command.ReadOrders));
+						ps.setInt(2, Integer.parseInt(dataOrder.get(0))); //bruh we cant add the id of the customer cuz its a FK in DB
+						ps.setString(3, "Pending");
+						ps.setDate(4, Date.valueOf(LocalDate.now()));
+						ps.setDate(5, null);
+						ps.setString(6, dataOrder.get(1));
+						ps.setString(7, dataOrder.get(2));
+						ps.setInt(8, Integer.parseInt(dataOrder.get(3)));
+						ps.setString(9, dataOrder.get(4));
+						ps.setInt(10, Integer.parseInt(dataOrder.get(5)));
+						ps.executeUpdate();
+						
+					} catch (SQLException e) { e.printStackTrace(); }
+			  		
+			  		break;
+			  		
+			  	case InsertOrderReport:
+			  		ArrayList<String> dataO = (ArrayList<String>) msg.getContent();
+			  		ps = conn.prepareStatement("INSERT INTO ordersreport "
+							+ "(report_id, machine_id, location, data, month, year)"
+							+ " VALUES (?, ?, ?, ?, ?, ?)");
+			  		try  {
+			  			ps.setString(1, String.valueOf(getLastId("ordersreport", Command.InsertOrderReport)));
+			  			ps.setString(2, dataO.get(1));
+			  			ps.setString(3, dataO.get(2));
+			  			ps.setString(4, dataO.get(3));
+			  			ps.setString(5, dataO.get(4));
+			  			ps.setString(6, dataO.get(5));
+			  			ps.executeUpdate();
+			  			
+			  		} catch (Exception e) {	e .printStackTrace();}
+			  		break;
+			  		
+			  	case UpdateOrders:
+			  		ArrayList<Order> dataUpdateO = (ArrayList<Order>) msg.getContent();
+			  		
+			  		ps = conn.prepareStatement("UPDATE orders "
+							+ "SET order_status = ? "
+							+ "WHERE order_number = ?");
+			  		try 
+					{
+			  			for (Order order : dataUpdateO) {
+			  				ps.setString(1, order.getOrder_status());
+			  				ps.setInt(2, order.getOrder_num());
+			  				ps.executeUpdate();
+			  			}
+			  			
+					} catch (Exception e) {	e .printStackTrace();}
+			  		break;
+			  		
+			  	default:
+			  		break;
 		  	}
-		  	
-			
-
 		}
 	 
 	  public void UpdateToDB(Message details) throws SQLException {
@@ -152,7 +159,7 @@ public class DatabaseController {
 		 String TableName = s[0];
 		  switch (TableName)
 		  {
-		case "ordersreport":
+		  case "ordersreport":
 			PreparedStatement ps = conn.prepareStatement("UPDATE ordersreport "
 					+ "Set data = ?"
 					+ "Where report_id = ?");
@@ -163,6 +170,7 @@ public class DatabaseController {
 				ps.executeUpdate();
 			} catch (SQLException e) { e.printStackTrace(); }
 			break;
+			
 
 		default:
 			System.out.println("default entered");
@@ -356,6 +364,22 @@ public class DatabaseController {
 		   }
 		   lastID++;
 		   return lastID;
+		   
+	   }
+	   
+	   public boolean ImportUsers(String sqlTableBuilder) {
+		   Statement stmt;
+		   
+		   try {
+			   stmt = conn.createStatement();
+			   stmt.execute(sqlTableBuilder);
+		   }
+		   catch(SQLException e) { 
+			   e.printStackTrace(); 
+			   return false;
+		   }
+		   
+		   return true;
 		   
 	   }
 }
