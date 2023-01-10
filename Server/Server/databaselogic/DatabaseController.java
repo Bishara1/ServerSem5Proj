@@ -81,43 +81,33 @@ public class DatabaseController {
 		  		
 		  	case InsertOrder:
 		  		ps = conn.prepareStatement("INSERT INTO orders "
-						+ "(order_number, customer_id, order_status, order_created, confirmation_date,"
-						+ " location, items_in_order,price,supply_method,machine_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+						+ "(order_number, customer_id, order_status, order_created,"
+						+ " location, items_in_order,price,supply_method,machine_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
 		  		try 
 				{
 					ps.setInt(1, getLastId("orders", Command.ReadOrders));
-					ps.setInt(2, Integer.parseInt(data.get(0))); //bruh we cant add the id of the customer cuz its a FK in DB
+					ps.setInt(2, Integer.parseInt(data.get(0))); 
 					ps.setString(3, "Pending");
 					ps.setDate(4, Date.valueOf(LocalDate.now()));
-					ps.setDate(5, null);
-					ps.setString(6, data.get(1));
-					ps.setString(7, data.get(2));
-					ps.setInt(8, Integer.parseInt(data.get(3)));
-					ps.setString(9, data.get(4));
-					ps.setInt(10, Integer.parseInt(data.get(5)));
+					ps.setString(5, data.get(1));
+					ps.setString(6, data.get(2));
+					ps.setInt(7, Integer.parseInt(data.get(3)));
+					ps.setString(8, data.get(4));
+					ps.setInt(9, Integer.parseInt(data.get(5)));
 					ps.executeUpdate();
 					
 				} catch (SQLException e) { e.printStackTrace(); }
 		  		
-		  		ps = conn.prepareStatement("INSERT INTO orders "
-						+ "(order_number, customer_id, order_status, order_created, confirmation_date,"
-						+ " location, items_in_order,price,supply_method,machine_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-		  		try 
-				{
-					ps.setInt(1, getLastId("orders", Command.ReadOrders));
-					ps.setInt(2, Integer.parseInt(data.get(0))); //bruh we cant add the id of the customer cuz its a FK in DB
-					ps.setString(3, "Pending");
-					ps.setDate(4, Date.valueOf(LocalDate.now()));
-					ps.setDate(5, null);
-					ps.setString(6, data.get(1));
-					ps.setString(7, data.get(2));
-					ps.setInt(8, Integer.parseInt(data.get(3)));
-					ps.setString(9, data.get(4));
-					ps.setInt(10, Integer.parseInt(data.get(5)));
+				ps = conn.prepareStatement("UPDATE machines " 
+						+ "SET amount_per_item = ?"
+						+ "WHERE machine_id = ?"); 
+				try {
+					ps.setString(1, data.get(6));
+					ps.setInt(2, Integer.parseInt(data.get(5)));
 					ps.executeUpdate();
-					
 				} catch (SQLException e) { e.printStackTrace(); }
-		  		break;
+				//add new Total Inventory
+				break;
 		  		
 		  	case InsertOrderReport:
 		  		ps = conn.prepareStatement("INSERT INTO ordersreport "
@@ -148,10 +138,11 @@ public class DatabaseController {
 		    // data format = { id credit_card subscriber_num}
 		 String[] s = (String[]) details.getContent();
 		 String TableName = s[0];
+		 PreparedStatement ps;
 		  switch (TableName)
 		  {
 		case "ordersreport":
-			PreparedStatement ps = conn.prepareStatement("UPDATE ordersreport "
+			ps = conn.prepareStatement("UPDATE ordersreport "
 					+ "Set data = ?"
 					+ "Where report_id = ?");
 			try {
@@ -161,6 +152,19 @@ public class DatabaseController {
 				ps.executeUpdate();
 			} catch (SQLException e) { e.printStackTrace(); }
 			break;
+			
+		case "machinesAmount":
+			ps = conn.prepareStatement("UPDATE machines " 
+					+ "SET amount_per_item = ?"
+					+ "WHERE machine_id = ?"); 
+			try {
+				ps.setString(1, s[2]);
+				ps.setString(2, s[1]);
+				ps.executeUpdate();
+			} catch (SQLException e) { e.printStackTrace(); }
+			//add new Total Inventory
+			break;
+
 
 		default:
 			System.out.println("default entered");
@@ -244,6 +248,7 @@ public class DatabaseController {
 							tempSub.setUserName(rs.getString(8));
 							tempSub.setPassword(rs.getString(9));
 							tempSub.setRole(rs.getString(10));
+							tempSub.setIs_new_subscriber(rs.getInt(11));
 							alldata.add(tempSub);
 						}
 						break;
@@ -256,7 +261,6 @@ public class DatabaseController {
 							tempO.setCustomer_id(rs.getInt(2));
 							tempO.setOrder_status(rs.getString(3));
 							tempO.setOrder_created(rs.getDate(4));
-							tempO.setConfirmation_date(rs.getDate(5));
 							tempO.setLocation(rs.getString(6));
 							tempO.setItems_in_order(rs.getString(7));
 							tempO.setPrice(rs.getInt(8));
@@ -316,21 +320,23 @@ public class DatabaseController {
 	  public String[] ConnectToServer(String username) throws SQLException {
 			Statement stmt;
 			String password = null;
-			String[] passRoleFname = new String[3];
+			String[] passRoleFnameSubNumFirstCart = new String[5];
 			try 
 			{
 				stmt = conn.createStatement();
-				ResultSet rs = stmt.executeQuery("SELECT password,role,first_name FROM users Where user_name = \""+ username +"\"");
+				ResultSet rs = stmt.executeQuery("SELECT password,role,first_name,subscriber_number,is_new_subscriber FROM users Where user_name = \""+ username +"\"");
 		 		if(!rs.next())
 		 			return new String[] {"","",""};
-				passRoleFname[0] = rs.getString(1);
-		 		passRoleFname[1] = rs.getString(2);
-		 		passRoleFname[2] = rs.getString(3);
+				passRoleFnameSubNumFirstCart[0] = rs.getString(1);
+		 		passRoleFnameSubNumFirstCart[1] = rs.getString(2);
+		 		passRoleFnameSubNumFirstCart[2] = rs.getString(3);
+		 		passRoleFnameSubNumFirstCart[3] = rs.getString(4);
+		 		passRoleFnameSubNumFirstCart[4] = rs.getString(5);
 				
 				rs.close();
 			} catch (SQLException e) { e.printStackTrace(); }
 			
-			return passRoleFname;
+			return passRoleFnameSubNumFirstCart;
 	   }
 	  
 	   public static synchronized DatabaseController GetFunctionsInstance(String databasePassword) {
@@ -356,4 +362,6 @@ public class DatabaseController {
 		   return lastID;
 		   
 	   }
+	   
+	   
 }

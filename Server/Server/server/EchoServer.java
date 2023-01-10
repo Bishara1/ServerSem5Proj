@@ -182,7 +182,20 @@ public class EchoServer extends AbstractServer {
 				  
 			  case UpdateMachineStock:
 				  ArrayList<String> update = ((ArrayList<String>)data.getContent()); // get content
-				  dbController.UpdateToDB(update);
+				  String newAmount = "";
+				  for(int i = 1;i<update.size();i++)
+				  {
+					  newAmount += update.get(i);
+					  if(i != update.size()-1)
+					  	newAmount += ",";
+				  }
+				  update.add(0, "machinesAmount");
+				  String[] param = new String[3];
+				  param[0] = "machinesAmount";
+				  param[1] = update.get(1);
+				  param[2] = newAmount;
+				  Message msg1 = new Message(param,Command.UpdateMachineStock);
+				  dbController.UpdateToDB(msg1);
 				  response.setCommand(Command.UpdateMachineStock);
 				  client.sendToClient(response);
 				  break;
