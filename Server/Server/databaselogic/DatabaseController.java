@@ -26,7 +26,6 @@ import logic.*;
 public class DatabaseController {
 	  private Connection conn;
 	  private static DatabaseController DBFunctionsInstance = null;  // only one instance (singleton)
-	 
 	
 	  private DatabaseController(String dbpassword) {
 		  ConnectToDB(dbpassword);
@@ -39,6 +38,7 @@ public class DatabaseController {
 		      System.out.println("Driver definition succeed");
 		  } catch (Exception ex) {
 			  /* handle the error*/
+//			  sic.screen.setText("Driver definition failed");
 			  System.out.println("Driver definition failed");
 	      }
 	      
@@ -112,6 +112,22 @@ public class DatabaseController {
 		  			ps.setString(4, data.get(3));
 		  			ps.setString(5, data.get(4));
 		  			ps.setString(6, data.get(5));
+		  			ps.executeUpdate();
+		  			
+		  		} catch (Exception e) {	e.printStackTrace();}
+		  		break;
+		  		
+		  	case InsertInventoryReport:
+		  		ps=conn.prepareStatement("INSERT INTO inventoryreport "
+						+ "(machine_id, items, total_inventory, location)"
+						+ " VALUES ( ?, ?, ?, ?)");
+		  		try 
+		  		{
+		  			ps.setString(1, data.get(0));
+		  			ps.setString(2, data.get(1));
+		  			ps.setString(3, data.get(2));
+		  			ps.setString(4, data.get(3));
+		  			
 		  			ps.executeUpdate();
 		  			
 		  		} catch (Exception e) {	e.printStackTrace();}

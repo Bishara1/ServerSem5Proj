@@ -29,7 +29,7 @@
          <font>
             <Font size="21.0" />
          </font></Button>
-      <TableView fx:id="table" editable="true" layoutX="339.0" layoutY="139.0" prefHeight="212.0" prefWidth="420.0">
+      <TableView fx:id="table" editable="true" layoutX="339.0" layoutY="132.0" prefHeight="173.0" prefWidth="420.0">
         <columns>
           <TableColumn fx:id="colIp" prefWidth="140.0" text="IP" />
           <TableColumn fx:id="colHost" prefWidth="140.0" text="HOST" />
@@ -71,6 +71,11 @@
          </font>
       </Label>
       <PasswordField fx:id="databasePasswordtxt" layoutX="139.0" layoutY="260.0" prefHeight="31.0" prefWidth="161.0" />
-      <TextArea fx:id="screen" layoutX="340.0" layoutY="365.0" prefHeight="138.0" prefWidth="420.0" promptText="Waiting for connection ..." />
+      <TextArea fx:id="screen" editable="false" layoutX="340.0" layoutY="346.0" onDragDetected="#RunServerBtn" prefHeight="153.0" prefWidth="420.0" promptText="Console . . ." />
+      <Label layoutX="497.0" layoutY="308.0" text="Console" textFill="#c14302">
+         <font>
+            <Font name="System Bold Italic" size="23.0" />
+         </font>
+      </Label>
    </children>
 </AnchorPane>
