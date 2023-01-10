@@ -39,8 +39,8 @@ public class ServerInfoController implements Initializable {
 	@FXML
 	private Button startServerbtn;
 	
-//	@FXML
-//	public TextArea screen;
+	@FXML
+	public TextArea screen;
 //	public static String msg;
 	
 	@FXML

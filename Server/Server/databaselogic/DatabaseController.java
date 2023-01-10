@@ -27,7 +27,6 @@ public class DatabaseController {
 	  private Connection conn;
 	  private boolean isConnectedToDB = false;
 	  private static DatabaseController DBFunctionsInstance = null;  // only one instance (singleton)
-	 
 	
 	  private DatabaseController(String dbpassword) {
 		  ConnectToDB(dbpassword);
@@ -47,6 +46,7 @@ public class DatabaseController {
 		      System.out.println("Driver definition succeed");
 		  } catch (Exception ex) {
 			  /* handle the error*/
+//			  sic.screen.setText("Driver definition failed");
 			  System.out.println("Driver definition failed");
 			  noErrors = false;
 	      }
@@ -67,11 +67,12 @@ public class DatabaseController {
 	  }
 	  
 	 @SuppressWarnings("unchecked")
-	  public void SaveToDB(Object message) throws SQLException {
-		  	PreparedStatement ps;
+	 public void SaveToDB(Object message) throws SQLException {
+		 	PreparedStatement ps;
 		  	Message msg = (Message)message;
 		  	
 		  	switch(msg.getCommand()) {
+//<<<<<<<<<<<<<<<<<HEAD
 			  	case InsertUser:
 			  		ArrayList<String> data = (ArrayList<String>) msg.getContent();
 				  	ps = conn.prepareStatement("INSERT INTO users "
@@ -151,8 +152,84 @@ public class DatabaseController {
 			  	default:
 			  		break;
 		  	}
-		}
-	 
+	 }
+//=======
+//		  	case InsertUser:
+//		  	ps = conn.prepareStatement("INSERT INTO users "
+//						+ "(first_name, last_name, id, phone_number, email_address,"
+//						+ " credit_card_number, subscriber_number,user_name,password,role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,?)");
+//				try 
+//				{
+//					for (int i = 1; i < 11; i++)
+//					{	if ((i==3) || (i==7))
+//							ps.setInt(i, Integer.parseInt(data.get(i-1)));
+//					else
+//						ps.setString(i, data.get(i-1));
+//					}
+//					
+////					ps.executeQuery();
+//					ps.executeUpdate();
+//				} catch (SQLException e) { e.printStackTrace(); }
+//		  		
+//		  	case InsertOrder:
+//		  		ps = conn.prepareStatement("INSERT INTO orders "
+//						+ "(order_number, customer_id, order_status, order_created, confirmation_date,"
+//						+ " location, items_in_order,price,supply_method,machine_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+//		  		try 
+//				{
+//					ps.setInt(1, getLastId("orders", Command.ReadOrders));
+//					ps.setInt(2, Integer.parseInt(data.get(0))); //bruh we cant add the id of the customer cuz its a FK in DB
+//					ps.setString(3, "Pending");
+//					ps.setDate(4, Date.valueOf(LocalDate.now()));
+//					ps.setDate(5, null);
+//					ps.setString(6, data.get(1));
+//					ps.setString(7, data.get(2));
+//					ps.setInt(8, Integer.parseInt(data.get(3)));
+//					ps.setString(9, data.get(4));
+//					ps.setInt(10, Integer.parseInt(data.get(5)));
+//					ps.executeUpdate();
+//					
+//				} catch (SQLException e) { e.printStackTrace(); }
+//		  		break;
+//		  		
+//		  	case InsertOrderReport:
+//		  		ps = conn.prepareStatement("INSERT INTO ordersreport "
+//						+ "(report_id, machine_id, location, data, month, year)"
+//						+ " VALUES (?, ?, ?, ?, ?, ?)");
+//		  		try 
+//		  		{
+//		  			ps.setString(1, String.valueOf(getLastId("ordersreport", Command.InsertOrderReport)));
+//		  			ps.setString(2, data.get(1));
+//		  			ps.setString(3, data.get(2));
+//		  			ps.setString(4, data.get(3));
+//		  			ps.setString(5, data.get(4));
+//		  			ps.setString(6, data.get(5));
+//		  			ps.executeUpdate();
+//		  			
+//		  		} catch (Exception e) {	e.printStackTrace();}
+//		  		break;
+//		  		
+//		  	case InsertInventoryReport:
+//		  		ps=conn.prepareStatement("INSERT INTO inventoryreport "
+//						+ "(machine_id, items, total_inventory, location)"
+//						+ " VALUES ( ?, ?, ?, ?)");
+//		  		try 
+//		  		{
+//		  			ps.setString(1, data.get(0));
+//		  			ps.setString(2, data.get(1));
+//		  			ps.setString(3, data.get(2));
+//		  			ps.setString(4, data.get(3));
+//		  			
+//		  			ps.executeUpdate();
+//		  			
+//		  		} catch (Exception e) {	e.printStackTrace();}
+//		  		break;
+//		  		
+//		  	default:
+//		  		break;
+//		  	}
+//		}
+//	 
 	  public void UpdateToDB(Message details) throws SQLException {
 		    // data format = { id credit_card subscriber_num}
 		 String[] s = (String[]) details.getContent();
@@ -266,7 +343,6 @@ public class DatabaseController {
 							tempO.setCustomer_id(rs.getInt(2));
 							tempO.setOrder_status(rs.getString(3));
 							tempO.setOrder_created(rs.getDate(4));
-							tempO.setConfirmation_date(rs.getDate(5));
 							tempO.setLocation(rs.getString(6));
 							tempO.setItems_in_order(rs.getString(7));
 							tempO.setPrice(rs.getInt(8));

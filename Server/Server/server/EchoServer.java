@@ -208,12 +208,14 @@ public class EchoServer extends AbstractServer {
 						  break;
 					  }
 			  	  }
+				  
 				  if(found == false)
 				  {
 					  String[] ip = client.toString().split(" ");
 					  users.add(new Connected(ip[0],String.valueOf(this.getPort()),"Connected"));
 					  
 				  }
+				  
 				  String username = (String)data.getContent();
 				  String[] passRoleFname = dbController.ConnectToServer(username);
 				  response.setContent(passRoleFname);
@@ -326,6 +328,13 @@ public class EchoServer extends AbstractServer {
 			    	response.setCommand(Command.InsertOrderReport);
 			    	response.setContent(0);
 			    	dbController.SaveToDB(data);
+			    	client.sendToClient(response);
+			    	break;
+			    	
+			    case InsertInventoryReport:
+					response.setCommand(Command.InsertInventoryReport);
+					response.setContent(0);
+					dbController.SaveToDB(data);
 			    	client.sendToClient(response);
 			    	break;
 						  
