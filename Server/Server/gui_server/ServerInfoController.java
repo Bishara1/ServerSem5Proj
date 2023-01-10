@@ -30,8 +30,8 @@ public class ServerInfoController implements Initializable {
 	@FXML
 	private PasswordField databasePasswordtxt;
 	
-//	@FXML
-//	public TextArea screen;
+	@FXML
+	public TextArea screen;
 //	public static String msg;
 	
 	@FXML

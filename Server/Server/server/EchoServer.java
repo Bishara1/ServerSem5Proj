@@ -346,6 +346,13 @@ public class EchoServer extends AbstractServer {
 			    	dbController.SaveToDB(data);
 			    	client.sendToClient(response);
 			    	break;
+			    	
+			    case InsertInventoryReport:
+					response.setCommand(Command.InsertInventoryReport);
+					response.setContent(0);
+					dbController.SaveToDB(data);
+			    	client.sendToClient(response);
+			    	break;
 						  
 			    case ReadLocations:
 			    	response.setCommand(Command.ReadLocations);
