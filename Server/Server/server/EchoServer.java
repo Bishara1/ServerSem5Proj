@@ -18,7 +18,9 @@ import logic.Order;
 import logic.OrdersReports;
 import logic.Subscriber;
 import logic.Request;
+import logic.StockRequest;
 import databaselogic.DatabaseController;
+import gui_server.ServerInfoController;
 import ocsf.server.*;
 import common.Command;
 import common.Message;
@@ -67,11 +69,13 @@ public class EchoServer extends AbstractServer {
    * @param client The connection from which the message originated.
    */
   
+  
   public void handleMessageFromClient(Object msg, ConnectionToClient client)
   {
 	  	Message data = (Message) msg;
 	  
-		System.out.println("Message received: " + msg + " from " + client);
+//		System.out.println("Message received: " + msg + " from " + client);
+	  	updateCommandText( "Message received: " + msg + " from " + client);
 		try {
 		
 			ParseClientData(data, client);
@@ -101,7 +105,8 @@ public class EchoServer extends AbstractServer {
 	  if (dbController.IsConnectedToDB())
 		  isConnectedToDatabase = true;
 	  
-	  System.out.println("Server listening for connections on port " + getPort());
+//	  System.out.println("Server listening for connections on port " + getPort());
+	  updateCommandText("Server listening for connections on port " + getPort());
   }
   
   /**
@@ -109,14 +114,20 @@ public class EchoServer extends AbstractServer {
    * when the server stops listening for connections.
    */
   protected void serverStopped() {
-	  System.out.println("Server has stopped listening for connections.");
+//	  System.out.println("Server has stopped listening for connections.");//
+	  updateCommandText("Server has stopped listening for connections.");
   }
   
   @Override
   protected void clientConnected(ConnectionToClient client) {
 //	  ArrayList<String> info = new ArrayList<>();
 //	  info.add(client.getInetAddress().toString());
-	  System.out.println("Connected");
+//	  System.out.println("Connected");
+//	  updateCommandText("Connected");
+  }
+  
+  public static void updateCommandText(String message) {
+	  ServerInfoController.commandLineText += message + "\n";  
   }
   
 
@@ -147,7 +158,8 @@ public class EchoServer extends AbstractServer {
       sv.listen(); //Start listening for connections
     } 
     catch (Exception ex)  {
-      System.out.println("ERROR - Could not listen for clients!");
+//      System.out.println("ERROR - Could not listen for clients!");
+        updateCommandText("ERROR - Could not listen for clients!");
     }
   }
   
@@ -180,6 +192,13 @@ public class EchoServer extends AbstractServer {
 				  dbController.UpdateToDB(msg);
 				  response.setCommand(Command.DatabaseUpdate);
 				  client.sendToClient(response); //tableName,id,whatToUpdate
+				  break;
+				  
+			  case UpdateMachineStock:
+				  dbController.UpdateToDB(data);
+				  response.setCommand(Command.UpdateMachineStock);
+				  response.setContent(null);
+				  client.sendToClient(response);
 				  break;
 	
 			  case InsertUser:
@@ -280,7 +299,6 @@ public class EchoServer extends AbstractServer {
 					   
 			    case ReadRequests:
 					   response.setCommand(Command.ReadRequests);
-					   
 					   GottenDatabase = dbController.ReadFromDB(data);
 					   ArrayList<Request> requests = new ArrayList<>();
 					   
@@ -366,13 +384,41 @@ public class EchoServer extends AbstractServer {
 			    case UpdateOrders:
 			    	response.setCommand(Command.UpdateOrders);
 			    	response.setContent(null);
-			    	dbController.SaveToDB(data);
+			    	dbController.UpdateToDB(data);
 			    	
 			    	client.sendToClient(response);
 			    	break;
 			    	
+			    case UpdateDeliveries:
+			    	response.setCommand(Command.UpdateDeliveries);
+			    	response.setContent(null);
+			    	dbController.UpdateToDB(data);
+			    	
+			    	client.sendToClient(response);
+			    	break;
+			    	
+			    case InsertStockRequest:
+			    	response.setCommand(Command.InsertStockRequest);
+			    	response.setContent(0);
+			    	dbController.SaveToDB(data);
+			    	client.sendToClient(response);
+			    	break;
+			    	
+			    case ReadStockRequests:
+			    	response.setCommand(Command.ReadStockRequests);
+			    	ArrayList<StockRequest> stockRequests = new ArrayList<StockRequest>();
+			    	GottenDatabase = dbController.ReadFromDB(data);
+			    	
+			    	for(Object obj : GottenDatabase)
+			    		stockRequests.add((StockRequest)obj);
+			    	
+			    	response.setContent(stockRequests);
+			    	client.sendToClient(response);
+			    	break;
+			    	
 			    default:
-			    	System.out.println("I am stuck at default case in echoserver");
+//			    	System.out.println("I am stuck at default case in echoserver");
+			    	updateCommandText("I am stuck at default case in echoserver");
 		    		break;  // add functionality
 		 }  
 	  } catch(SQLException e) {e.printStackTrace();}

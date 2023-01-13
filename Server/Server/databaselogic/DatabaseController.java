@@ -21,15 +21,23 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 import logic.*;
+import server.EchoServer;
 
 //This Class is built using Singleton design pattern
 public class DatabaseController {
 	  private Connection conn;
 	  private boolean isConnectedToDB = false;
 	  private static DatabaseController DBFunctionsInstance = null;  // only one instance (singleton)
+	  
+	  private DatabaseController() {
+		  DBFunctionsInstance = this;
+	  }
 	
 	  private DatabaseController(String dbpassword) {
-		  ConnectToDB(dbpassword);
+		  if(isConnectedToDB == false) {
+		  	  ConnectToDB(dbpassword);
+			  DBFunctionsInstance = this;
+		  }
 	  }
 	  
 	  public boolean IsConnectedToDB() {
@@ -37,220 +45,248 @@ public class DatabaseController {
 	  }
 	
 	
-	public void ConnectToDB(String databasePassword) {
+	  public void ConnectToDB(String databasePassword) {
 		  boolean noErrors = true;
 		  if (isConnectedToDB)
 			  return;
 		  try {
 		      Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
-		      System.out.println("Driver definition succeed");
+//		      System.out.println("Driver definition succeed");
+		      EchoServer.updateCommandText("Driver definition succeed");
+		      
 		  } catch (Exception ex) {
 			  /* handle the error*/
 //			  sic.screen.setText("Driver definition failed");
-			  System.out.println("Driver definition failed");
+//			  System.out.println("Driver definition failed");
+			  EchoServer.updateCommandText("Driver definition failed");
 			  noErrors = false;
 	      }
 	      
 	      try 
 	      {
 	          conn = DriverManager.getConnection("jdbc:mysql://localhost/ekrut?serverTimezone=IST", "root", databasePassword);
-	          System.out.println("SQL connection succeed");
+//	          System.out.println("SQL connection succeed");
+	          EchoServer.updateCommandText("SQL connection succeed");
 	   	  } catch (SQLException ex)  { /* handle any errors*/
-				System.out.println("SQLException: " + ex.getMessage());
-				System.out.println("SQLState: " + ex.getSQLState());
-				System.out.println("VendorError: " + ex.getErrorCode());
+//				System.out.println("SQLException: " + ex.getMessage());
+//				System.out.println("SQLState: " + ex.getSQLState());
+//				System.out.println("VendorError: " + ex.getErrorCode());
+				EchoServer.updateCommandText("SQLException: " + ex.getMessage());
+				EchoServer.updateCommandText("SQLState: " + ex.getSQLState());
+				EchoServer.updateCommandText("VendorError: " + ex.getErrorCode());
 				noErrors = false;
 	   	  }
 	      
 	      if(noErrors)
 	    	  isConnectedToDB = true;
-	  }
+	 }
+	
+	public void ImportExternalUsers() {
+		ArrayList<Subscriber> externalUsers = new ArrayList<>();
+		ArrayList<Object> externalUsersAsObj = new ArrayList<>();
+		int size;
+		String query = "INSERT INTO users (first_name, last_name, ID, phone_number, email_address, "
+				+ "credit_card_number, subscriber_number, user_name, password, role, is_new_subscriber) "
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		PreparedStatement ps;
+		
+		try {
+			//get external users
+			externalUsersAsObj = ReadFromDB(new Message(0, Command.ReadExternalTable));
+			size = externalUsersAsObj.size();
+			
+			//convert the user objects to subscriber and add them to arraylist
+			for (Object user : externalUsersAsObj)
+				externalUsers.add((Subscriber) user);
+			
+			//Update database
+			ps = conn.prepareStatement(query);
+			for (Subscriber user : externalUsers) {
+				ps.setString(1, user.getFname());
+				ps.setString(2, user.getLName());
+				ps.setInt(3, user.getId());
+				ps.setString(4, user.getPhoneNum());
+				ps.setString(5, user.getEmail());
+				ps.setString(6, user.getVisa());
+				ps.setInt(7, user.getSubNum());
+				ps.setString(8, user.getUserName());
+				ps.setString(9, user.getPassword());
+				ps.setString(10, user.getRole());
+				ps.setInt(11, user.getIs_new_subscriber());
+				ps.executeUpdate();
+			}
+		} catch(SQLException e) {e.printStackTrace();}
+		
+		
+	}
 	  
 	 @SuppressWarnings("unchecked")
 	 public void SaveToDB(Object message) throws SQLException {
 		 	PreparedStatement ps;
 		  	Message msg = (Message)message;
+		  	ArrayList<String> data = (ArrayList<String>)msg.getContent();
 		  	
 		  	switch(msg.getCommand()) {
-//<<<<<<<<<<<<<<<<<HEAD
-			  	case InsertUser:
-			  		ArrayList<String> data = (ArrayList<String>) msg.getContent();
-				  	ps = conn.prepareStatement("INSERT INTO users "
-								+ "(first_name, last_name, id, phone_number, email_address,"
-								+ " credit_card_number, subscriber_number,user_name,password,role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,?)");
-					try 
-					{
-						for (int i = 1; i < 11; i++)
-						{	if ((i==3) || (i==7))
-								ps.setInt(i, Integer.parseInt(data.get(i-1)));
-						else
-							ps.setString(i, data.get(i-1));
-						}
-						
-	//					ps.executeQuery();
-						ps.executeUpdate();
-					} catch (SQLException e) { e.printStackTrace(); }
-					break;
-			  		
-			  	case InsertOrder:
-			  		ArrayList<String> dataOrder = (ArrayList<String>) msg.getContent();
-			  		ps = conn.prepareStatement("INSERT INTO orders "
-							+ "(order_number, customer_id, order_status, order_created, confirmation_date,"
-							+ " location, items_in_order,price,supply_method,machine_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-			  		try 
-					{
-						ps.setInt(1, getLastId("orders", Command.ReadOrders));
-						ps.setInt(2, Integer.parseInt(dataOrder.get(0))); //bruh we cant add the id of the customer cuz its a FK in DB
-						ps.setString(3, "Pending");
-						ps.setDate(4, Date.valueOf(LocalDate.now()));
-						ps.setDate(5, null);
-						ps.setString(6, dataOrder.get(1));
-						ps.setString(7, dataOrder.get(2));
-						ps.setInt(8, Integer.parseInt(dataOrder.get(3)));
-						ps.setString(9, dataOrder.get(4));
-						ps.setInt(10, Integer.parseInt(dataOrder.get(5)));
-						ps.executeUpdate();
-						
-					} catch (SQLException e) { e.printStackTrace(); }
-			  		
-			  		break;
-			  		
-			  	case InsertOrderReport:
-			  		ArrayList<String> dataO = (ArrayList<String>) msg.getContent();
-			  		ps = conn.prepareStatement("INSERT INTO ordersreport "
-							+ "(report_id, machine_id, location, data, month, year)"
-							+ " VALUES (?, ?, ?, ?, ?, ?)");
-			  		try  {
-			  			ps.setString(1, String.valueOf(getLastId("ordersreport", Command.InsertOrderReport)));
-			  			ps.setString(2, dataO.get(1));
-			  			ps.setString(3, dataO.get(2));
-			  			ps.setString(4, dataO.get(3));
-			  			ps.setString(5, dataO.get(4));
-			  			ps.setString(6, dataO.get(5));
-			  			ps.executeUpdate();
-			  			
-			  		} catch (Exception e) {	e .printStackTrace();}
-			  		break;
-			  		
-			  	case UpdateOrders:
-			  		ArrayList<Order> dataUpdateO = (ArrayList<Order>) msg.getContent();
-			  		
-			  		ps = conn.prepareStatement("UPDATE orders "
-							+ "SET order_status = ? "
-							+ "WHERE order_number = ?");
-			  		try 
-					{
-			  			for (Order order : dataUpdateO) {
-			  				ps.setString(1, order.getOrder_status());
-			  				ps.setInt(2, order.getOrder_num());
-			  				ps.executeUpdate();
-			  			}
-			  			
-					} catch (Exception e) {	e .printStackTrace();}
-			  		break;
-			  		
-			  	default:
-			  		break;
+		  	case InsertUser:
+		  	ps = conn.prepareStatement("INSERT INTO users "
+						+ "(first_name, last_name, id, phone_number, email_address,"
+						+ " credit_card_number, subscriber_number,user_name,password,role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,?)");
+				try 
+				{
+					for (int i = 1; i < 11; i++)
+					{	if ((i==3) || (i==7))
+							ps.setInt(i, Integer.parseInt(data.get(i-1)));
+					else
+						ps.setString(i, data.get(i-1));
+					}
+					
+//					ps.executeQuery();
+					ps.executeUpdate();
+				} catch (SQLException e) { e.printStackTrace(); }
+		  		
+		  	case InsertOrder:
+		  		ps = conn.prepareStatement("INSERT INTO orders "
+						+ "(order_number, customer_id, order_status, order_created,"
+						+ " location, items_in_order,price,supply_method,machine_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+		  		try 
+				{
+					ps.setInt(1, getLastId("orders", Command.ReadOrders));
+					ps.setInt(2, Integer.parseInt(data.get(0))); 
+					ps.setString(3, "Pending");
+					ps.setDate(4, Date.valueOf(LocalDate.now()));
+					ps.setString(5, data.get(1));
+					ps.setString(6, data.get(2));
+					ps.setInt(7, Integer.parseInt(data.get(3)));
+					ps.setString(8, data.get(4));
+					ps.setInt(9, Integer.parseInt(data.get(5)));
+					ps.executeUpdate();
+					
+				} catch (SQLException e) { e.printStackTrace(); }
+		  		
+				ps = conn.prepareStatement("UPDATE machines " 
+						+ "SET amount_per_item = ?"
+						+ "WHERE machine_id = ?"); 
+				try {
+					ps.setString(1, data.get(6));
+					ps.setInt(2, Integer.parseInt(data.get(5)));
+					ps.executeUpdate();
+				} catch (SQLException e) { e.printStackTrace(); }
+				//add new Total Inventory
+				break;
+		  		
+		  	case InsertOrderReport:
+		  		ps = conn.prepareStatement("INSERT INTO ordersreport "
+						+ "(report_id, machine_id, location, data, month, year)"
+						+ " VALUES (?, ?, ?, ?, ?, ?)");
+		  		try 
+		  		{
+		  			ps.setString(1, String.valueOf(getLastId("ordersreport", Command.InsertOrderReport)));
+		  			ps.setString(2, data.get(1));
+		  			ps.setString(3, data.get(2));
+		  			ps.setString(4, data.get(3));
+		  			ps.setString(5, data.get(4));
+		  			ps.setString(6, data.get(5));
+		  			ps.executeUpdate();
+		  			
+		  		} catch (Exception e) {	e.printStackTrace();}
+		  		break;
+		  		
+		  	case InsertInventoryReport:
+		  		ps=conn.prepareStatement("INSERT INTO inventoryreport "
+						+ "(machine_id, items, total_inventory, location)"
+						+ " VALUES ( ?, ?, ?, ?)");
+		  		try 
+		  		{
+		  			ps.setString(1, data.get(0));
+		  			ps.setString(2, data.get(1));
+		  			ps.setString(3, data.get(2));
+		  			ps.setString(4, data.get(3));
+		  			
+		  			ps.executeUpdate();
+		  			
+		  		} catch (Exception e) {	e.printStackTrace();}
+		  		break;
+		  		
+		  		
+		  	default:
+		  		break;
 		  	}
 	 }
-//=======
-//		  	case InsertUser:
-//		  	ps = conn.prepareStatement("INSERT INTO users "
-//						+ "(first_name, last_name, id, phone_number, email_address,"
-//						+ " credit_card_number, subscriber_number,user_name,password,role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,?)");
-//				try 
-//				{
-//					for (int i = 1; i < 11; i++)
-//					{	if ((i==3) || (i==7))
-//							ps.setInt(i, Integer.parseInt(data.get(i-1)));
-//					else
-//						ps.setString(i, data.get(i-1));
-//					}
-//					
-////					ps.executeQuery();
-//					ps.executeUpdate();
-//				} catch (SQLException e) { e.printStackTrace(); }
-//		  		
-//		  	case InsertOrder:
-//		  		ps = conn.prepareStatement("INSERT INTO orders "
-//						+ "(order_number, customer_id, order_status, order_created, confirmation_date,"
-//						+ " location, items_in_order,price,supply_method,machine_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-//		  		try 
-//				{
-//					ps.setInt(1, getLastId("orders", Command.ReadOrders));
-//					ps.setInt(2, Integer.parseInt(data.get(0))); //bruh we cant add the id of the customer cuz its a FK in DB
-//					ps.setString(3, "Pending");
-//					ps.setDate(4, Date.valueOf(LocalDate.now()));
-//					ps.setDate(5, null);
-//					ps.setString(6, data.get(1));
-//					ps.setString(7, data.get(2));
-//					ps.setInt(8, Integer.parseInt(data.get(3)));
-//					ps.setString(9, data.get(4));
-//					ps.setInt(10, Integer.parseInt(data.get(5)));
-//					ps.executeUpdate();
-//					
-//				} catch (SQLException e) { e.printStackTrace(); }
-//		  		break;
-//		  		
-//		  	case InsertOrderReport:
-//		  		ps = conn.prepareStatement("INSERT INTO ordersreport "
-//						+ "(report_id, machine_id, location, data, month, year)"
-//						+ " VALUES (?, ?, ?, ?, ?, ?)");
-//		  		try 
-//		  		{
-//		  			ps.setString(1, String.valueOf(getLastId("ordersreport", Command.InsertOrderReport)));
-//		  			ps.setString(2, data.get(1));
-//		  			ps.setString(3, data.get(2));
-//		  			ps.setString(4, data.get(3));
-//		  			ps.setString(5, data.get(4));
-//		  			ps.setString(6, data.get(5));
-//		  			ps.executeUpdate();
-//		  			
-//		  		} catch (Exception e) {	e.printStackTrace();}
-//		  		break;
-//		  		
-//		  	case InsertInventoryReport:
-//		  		ps=conn.prepareStatement("INSERT INTO inventoryreport "
-//						+ "(machine_id, items, total_inventory, location)"
-//						+ " VALUES ( ?, ?, ?, ?)");
-//		  		try 
-//		  		{
-//		  			ps.setString(1, data.get(0));
-//		  			ps.setString(2, data.get(1));
-//		  			ps.setString(3, data.get(2));
-//		  			ps.setString(4, data.get(3));
-//		  			
-//		  			ps.executeUpdate();
-//		  			
-//		  		} catch (Exception e) {	e.printStackTrace();}
-//		  		break;
-//		  		
-//		  	default:
-//		  		break;
-//		  	}
-//		}
-//	 
+	 
 	  public void UpdateToDB(Message details) throws SQLException {
 		    // data format = { id credit_card subscriber_num}
 		 String[] s = (String[]) details.getContent();
 		 String TableName = s[0];
+		 PreparedStatement ps;
+		 
 		  switch (TableName)
 		  {
-		  case "ordersreport":
-			PreparedStatement ps = conn.prepareStatement("UPDATE ordersreport "
-					+ "Set data = ?"
-					+ "Where report_id = ?");
-			try {
-				ps.setString(1, s[2]);
-				ps.setString(2, s[1]);
-			
-				ps.executeUpdate();
+			case "ordersreport":
+				ps = conn.prepareStatement("UPDATE ordersreport "
+						+ "Set data = ?"
+						+ "Where report_id = ?");
+				try {
+					ps.setString(1, s[2]);
+					ps.setString(2, s[1]);
+				
+					ps.executeUpdate();
+				} catch (SQLException e) { e.printStackTrace(); }
+				break;
+				
+			case "delivery":
+				String[] numberAndStatus;
+				ps = conn.prepareStatement("UPDATE delivery "
+						+ "SET status = ?, estimated_delivery = ?"
+						+ "WHERE order_id = ?");
+				
+				try {
+					for (int i = 1; i < s.length; i++) {
+						numberAndStatus = s[i].split(" ");
+						ps.setString(1, numberAndStatus[1]);
+						ps.setString(2, numberAndStatus[2]);
+						ps.setInt(3, Integer.parseInt(numberAndStatus[0]));
+//						System.out.println("Updated client about current delivery. Estimated time: " + numberAndStatus[2]);
+						EchoServer.updateCommandText("Updated client about current delivery. Estimated time: " + numberAndStatus[2]);
+						
+						ps.executeUpdate();
+					}
+				} catch (SQLException e) { e.printStackTrace(); }
+				break;
+				
+			case "orders":
+				String[] numberAndStatusForOrder;
+				ps = conn.prepareStatement("UPDATE orders "
+						+ "SET order_status = ? "
+						+ "WHERE order_number = ?");
+				
+				try {
+					for (int i = 1; i < s.length; i++) {
+						numberAndStatusForOrder = s[i].split(" ");
+						ps.setString(1, numberAndStatusForOrder[1]);
+						ps.setInt(2, Integer.parseInt(numberAndStatusForOrder[0]));
+						ps.executeUpdate();
+					}
+				} catch (SQLException e) { e.printStackTrace(); }
+				break;
+				
+			case "machinesAmount":
+				ps = conn.prepareStatement("UPDATE machines "
+						+ "SET amount_per_item = ?, items = ?, total_inventory = ? "
+						+ "WHERE machine_id = ?"); 
+				try {
+					ps.setString(1, s[1]);
+					ps.setString(2, s[2]);
+					ps.setInt(3, Integer.parseInt(s[3]));
+					ps.setInt(4, Integer.parseInt(s[4]));
+					ps.executeUpdate();
 			} catch (SQLException e) { e.printStackTrace(); }
+			//add new Total Inventory
 			break;
-			
 
-		default:
-			System.out.println("default entered");
+		  default:
+//			System.out.println("default entered in dbcontroller");
+			EchoServer.updateCommandText("default entered in dbcontroller");
+			
 			break;
 		}
 //			PreparedStatement ps = conn.prepareStatement("UPDATE users "
@@ -259,8 +295,6 @@ public class DatabaseController {
 			
 			
 		}
-	  
-
 
 	  public ArrayList<Object> ReadFromDB(Message m) throws SQLException {
 		    Statement stmt;
@@ -273,11 +307,8 @@ public class DatabaseController {
 			try {
 				stmt = conn.createStatement();
 				ResultSet rs = stmt.executeQuery(query);
-				if(!rs.next()) {
-					alldata.add(null);
-					return alldata;
-		 			}
-				rs = stmt.executeQuery(query);
+				
+//				rs = stmt.executeQuery(query);
 				switch (m.getCommand()) {
 					case ReadMachines:
 						Machine tempM;
@@ -299,9 +330,13 @@ public class DatabaseController {
 							tempD = new Delivery();
 							tempD.setDelivery_id(rs.getInt(1));
 							tempD.setOrder_id(rs.getInt(2));
-							tempD.setShipping_date(rs.getDate(3));
-							tempD.setEstimated_dleivery(rs.getDate(4));
-							tempD.setStatus(rs.getString(5));
+							tempD.setCustomer_id(rs.getInt(3));
+							tempD.setShipping_date(rs.getDate(4));
+							tempD.setEstimated_Delivery(rs.getDate(5));
+							tempD.setStatus(rs.getString(6));
+							tempD.setTotal_price(rs.getInt(7));
+							tempD.setLocation(rs.getString(8));
+							tempD.setAddress(rs.getString(9));
 							alldata.add(tempD);
 						}
 						break;
@@ -331,8 +366,28 @@ public class DatabaseController {
 							tempSub.setUserName(rs.getString(8));
 							tempSub.setPassword(rs.getString(9));
 							tempSub.setRole(rs.getString(10));
+							tempSub.setIs_new_subscriber(rs.getInt(11));
 							alldata.add(tempSub);
 						}
+						
+					case ReadExternalTable:
+						Subscriber tempExternalSub;
+						while(rs.next()) {
+							tempExternalSub = new Subscriber();
+							tempExternalSub.setFname(rs.getString(1));
+							tempExternalSub.setLName(rs.getString(2));
+							tempExternalSub.setId(rs.getInt(3));
+							tempExternalSub.setPhoneNum(rs.getString(4));
+							tempExternalSub.setEmail(rs.getString(5));
+							tempExternalSub.setVisa(rs.getString(6));
+							tempExternalSub.setSubNum(rs.getInt(7));
+							tempExternalSub.setUserName(rs.getString(8));
+							tempExternalSub.setPassword(rs.getString(9));
+							tempExternalSub.setRole(rs.getString(10));
+							tempExternalSub.setIs_new_subscriber(rs.getInt(11));
+							alldata.add(tempExternalSub);
+						}
+						
 						break;
 						
 					case ReadOrders:
@@ -343,11 +398,11 @@ public class DatabaseController {
 							tempO.setCustomer_id(rs.getInt(2));
 							tempO.setOrder_status(rs.getString(3));
 							tempO.setOrder_created(rs.getDate(4));
-							tempO.setLocation(rs.getString(6));
-							tempO.setItems_in_order(rs.getString(7));
-							tempO.setPrice(rs.getInt(8));
-							tempO.setSupply_method(rs.getString(9));
-							tempO.setMachine_id(rs.getInt(10));
+							tempO.setLocation(rs.getString(5));
+							tempO.setItems_in_order(rs.getString(6));
+							tempO.setPrice(rs.getInt(7));
+							tempO.setSupply_method(rs.getString(8));
+							tempO.setMachine_id(rs.getInt(9));
 							alldata.add(tempO);
 						}
 						break;
@@ -387,8 +442,22 @@ public class DatabaseController {
 						}
 						break;
 						
+					case ReadStockRequests:
+						StockRequest tempRstock;
+						while(rs.next())
+						{
+							tempRstock = new StockRequest();
+							tempRstock.setStock_request_id(rs.getInt(1));
+							tempRstock.setMachine_id(rs.getInt(2));
+							tempRstock.setStatus(rs.getString(3));
+							tempRstock.setResolved_date(rs.getDate(4));
+							alldata.add(tempRstock);
+						}
+						break;
+						
 					default:
-						System.out.println("Dude what");
+//						System.out.println("Dude what");
+						EchoServer.updateCommandText("Dude what");
 						return null;
 							
 				}
@@ -402,25 +471,31 @@ public class DatabaseController {
 	  public String[] ConnectToServer(String username) throws SQLException {
 			Statement stmt;
 			String password = null;
-			String[] passRoleFname = new String[3];
+			String[] passRoleFnameSubNumFirstCart = new String[5];
 			try 
 			{
 				stmt = conn.createStatement();
-				ResultSet rs = stmt.executeQuery("SELECT password,role,first_name FROM users Where user_name = \""+ username +"\"");
+				ResultSet rs = stmt.executeQuery("SELECT password,role,first_name,subscriber_number,is_new_subscriber FROM users Where user_name = \""+ username +"\"");
 		 		if(!rs.next())
 		 			return new String[] {"","",""};
-				passRoleFname[0] = rs.getString(1);
-		 		passRoleFname[1] = rs.getString(2);
-		 		passRoleFname[2] = rs.getString(3);
+				passRoleFnameSubNumFirstCart[0] = rs.getString(1);
+		 		passRoleFnameSubNumFirstCart[1] = rs.getString(2);
+		 		passRoleFnameSubNumFirstCart[2] = rs.getString(3);
+		 		passRoleFnameSubNumFirstCart[3] = rs.getString(4);
+		 		passRoleFnameSubNumFirstCart[4] = rs.getString(5);
 				
 				rs.close();
 			} catch (SQLException e) { e.printStackTrace(); }
 			
-			return passRoleFname;
+			return passRoleFnameSubNumFirstCart;
 	   }
 	  
 	   public static synchronized DatabaseController GetFunctionsInstance(String databasePassword) {
 		   return ( DBFunctionsInstance == null ) ? new DatabaseController(databasePassword) : DBFunctionsInstance;
+	   }
+	   
+	   public static synchronized DatabaseController GetFunctionsInstance() {
+		   return ( DBFunctionsInstance == null ) ? new DatabaseController() : DBFunctionsInstance;
 	   }
 	   
 	   public int getLastId(String tableName, Command cmd) throws SQLException
@@ -440,22 +515,6 @@ public class DatabaseController {
 		   }
 		   lastID++;
 		   return lastID;
-		   
-	   }
-	   
-	   public boolean ImportUsers(String sqlTableBuilder) {
-		   Statement stmt;
-		   
-		   try {
-			   stmt = conn.createStatement();
-			   stmt.execute(sqlTableBuilder);
-		   }
-		   catch(SQLException e) { 
-			   e.printStackTrace(); 
-			   return false;
-		   }
-		   
-		   return true;
 		   
 	   }
 }

@@ -1,11 +1,7 @@
 package gui_server;
 
-import java.io.File;
 import java.net.URL;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.ResourceBundle;
-import java.util.Scanner;
 
 import databaselogic.DatabaseController;
 import javafx.collections.FXCollections;
@@ -41,7 +37,8 @@ public class ServerInfoController implements Initializable {
 	
 	@FXML
 	public TextArea screen;
-//	public static String msg;
+	public static String commandLineText = "";
+	private String currentStr = "";
 	
 	@FXML
 	private TableView<Connected> table;
@@ -70,30 +67,29 @@ public class ServerInfoController implements Initializable {
 	
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		new Thread() {
+	        public void run() {
+	        	while (true) {
+		        	if (!currentStr.equals(commandLineText)) {
+		        		screen.replaceText(0, screen.getLength(), commandLineText + "\n");
+		        		currentStr = commandLineText;
+		        	} else {
+						try {
+							Thread.sleep(100);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+		        	}
+	        	}
+            }
+
+	    }.start();
 		
 		serverIptxt.setText(EchoServer.getLocalIp());  // Set current ip
 		serverPortxt.setText("5555");
 		databasePasswordtxt.setText("Bv654gF11!");
 		LoadTable();
-
-		/*
-		 * data.addListener(new ListChangeListener<Connected>() {
-		 * 
-		 * @Override public void onChanged(Change<? extends Connected> c) { // TODO
-		 * Auto-generated method stub initialize(null, null); }
-		 * 
-		 * });
-		 */	}
-
-//		data.addListener(new ListChangeListener<Connected>() {
-//
-//			@Override
-//			public void onChanged(Change<? extends Connected> c) {
-//				// TODO Auto-generated method stub
-//				initialize(null, null);
-//			}
-//		});
-	
+	}
 	
 	public void RunServerBtn() {
 		// on click, change button color to #373057
@@ -104,16 +100,15 @@ public class ServerInfoController implements Initializable {
 		
 		String[] args = {serverPortxt.getText(), databasePasswordtxt.getText()};
 		EchoServer.runServer(args);
-//		LockUnlockTexts(true);
-		ranServerAlready = true;
-		
-		
+		LockUnlock(true);
+		ranServerAlready = true;	
 	}
 	
-	private void LockUnlockTexts(boolean condition) {
+	private void LockUnlock(boolean condition) {
 		serverIptxt.setDisable(condition);
 		serverPortxt.setDisable(condition);
 		databasePasswordtxt.setDisable(condition);
+		startServerbtn.setDisable(condition);
 	}
 	
 	public void RefreshClientsBtn() {
@@ -129,48 +124,18 @@ public class ServerInfoController implements Initializable {
 		colStatus.setCellValueFactory(new PropertyValueFactory<>("Status"));
 	}
 	
-//	public void PrintConsole(String msg1) {
-//		screen.appendText(msg1 + "\n");
-//			
-//	}
-	
-	
-	public void ImportDatabaseBtn() {
-		StringBuilder queryForBuild = new StringBuilder();
-		File file;
-		Scanner sc = null;
-		
-		if (ranServerAlready) {
-			// this line doesn't connect to database again because we already connected before
-			// but this "if" statement is necessary because we don't want to connect to database
-			// before running the server.
-			dbController = DatabaseController.GetFunctionsInstance(databasePasswordtxt.getText());  
-		}
-		
-		else {
-			System.out.println("Haven't connected to server yet!");
+	public void ImportUsersBtn() {
+		if (!ranServerAlready) {
+//			System.out.println("Haven't ran server yet!");
+			EchoServer.updateCommandText("Haven't ran server yet!");
 			return;
 		}
 		
-		try  
-		{  
-			file = new File("usersTbl.csv");   
-			sc = new Scanner(file);     //file to be scanned  
-			while (sc.hasNextLine()) {
-				queryForBuild.append(sc.nextLine() + "\n");
-			}
-			System.out.println(queryForBuild.toString());
-			
-			//dbController.ImportUsers(queryForBuild.toString());
-			
-		} 
-//		catch(SQLException e) {e.printStackTrace();}
-		catch(Exception e) { e.printStackTrace();} 
-		
-		if (sc != null)
-			sc.close();
+		dbController = DatabaseController.GetFunctionsInstance();
+		dbController.ImportExternalUsers();
+//		System.out.println("Imported Users successfully.");
+		EchoServer.updateCommandText("Imported Users successfully.");
 	}
-	
 	
 	public void QuitBtn() {
 		System.exit(0);

@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="603.0" prefWidth="787.0" style="-fx-background-color: #e3c68c; -fx-border-color: #c14302; -fx-border-style: #555;" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui_server.ServerInfoController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="604.0" prefWidth="787.0" style="-fx-background-color: #e3c68c; -fx-border-color: #c14302; -fx-border-style: #555;" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui_server.ServerInfoController">
    <children>
       <Label layoutX="59.0" layoutY="91.0" text="Server Configuration" textFill="#c14302">
          <font>
@@ -29,14 +29,14 @@
          <font>
             <Font size="21.0" />
          </font></Button>
-      <TableView fx:id="table" editable="true" layoutX="339.0" layoutY="139.0" prefHeight="243.0" prefWidth="420.0">
+      <TableView fx:id="table" editable="true" layoutX="339.0" layoutY="139.0" prefHeight="153.0" prefWidth="420.0">
         <columns>
           <TableColumn fx:id="colIp" prefWidth="140.0" text="IP" />
           <TableColumn fx:id="colHost" prefWidth="140.0" text="HOST" />
             <TableColumn fx:id="colStatus" prefWidth="140.0" text="STATUS" />
         </columns>
       </TableView>
-      <Label graphicTextGap="7.0" layoutX="300.0" layoutY="14.0" prefHeight="53.0" prefWidth="188.0" text="Server Info" textFill="#c14302">
+      <Label graphicTextGap="7.0" layoutX="241.0" layoutY="14.0" text="EKRUT Server Info" textFill="#c14302">
          <font>
             <Font name="System Bold Italic" size="36.0" />
          </font>
@@ -49,7 +49,7 @@
             <Font name="System Bold Italic" size="23.0" />
          </font>
       </Label>
-      <Button layoutX="69.0" layoutY="503.0" mnemonicParsing="false" onAction="#QuitBtn" prefHeight="36.0" prefWidth="225.0" style="-fx-background-color: #c14302;" text="Quit" textFill="WHITE">
+      <Button layoutX="69.0" layoutY="512.0" mnemonicParsing="false" onAction="#QuitBtn" prefHeight="36.0" prefWidth="225.0" style="-fx-background-color: #c14302;" text="Quit" textFill="WHITE">
          <font>
             <Font size="21.0" />
          </font>
@@ -71,8 +71,8 @@
          </font>
       </Label>
       <PasswordField fx:id="databasePasswordtxt" layoutX="139.0" layoutY="260.0" prefHeight="31.0" prefWidth="161.0" />
-      <TextArea fx:id="screen" layoutX="340.0" layoutY="403.0" prefHeight="147.0" prefWidth="420.0" promptText="Waiting for connection ..." />
-      <Button layoutX="69.0" layoutY="441.0" mnemonicParsing="false" onAction="#ImportDatabaseBtn" prefHeight="36.0" prefWidth="225.0" style="-fx-background-color: #c14302;" text="Import Database" textFill="WHITE">
+      <TextArea fx:id="screen" layoutX="340.0" layoutY="324.0" prefHeight="234.0" prefWidth="420.0" promptText="Waiting for connection ..." />
+      <Button layoutX="69.0" layoutY="446.0" mnemonicParsing="false" onAction="#ImportUsersBtn" prefHeight="36.0" prefWidth="225.0" style="-fx-background-color: #c14302;" text="Import Data" textFill="WHITE">
          <font>
             <Font size="21.0" />
          </font>
