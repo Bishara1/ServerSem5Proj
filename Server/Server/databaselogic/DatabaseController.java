@@ -9,8 +9,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 
 //import Client.ChatClient;
@@ -45,7 +47,7 @@ public class DatabaseController {
 	  }
 	
 	
-	  public void ConnectToDB(String databasePassword) {
+	public void ConnectToDB(String databasePassword) {
 		  boolean noErrors = true;
 		  if (isConnectedToDB)
 			  return;
@@ -79,7 +81,7 @@ public class DatabaseController {
 	      
 	      if(noErrors)
 	    	  isConnectedToDB = true;
-	 }
+	  }
 	
 	public void ImportExternalUsers() {
 		ArrayList<Subscriber> externalUsers = new ArrayList<>();
@@ -116,15 +118,14 @@ public class DatabaseController {
 				ps.executeUpdate();
 			}
 		} catch(SQLException e) {e.printStackTrace();}
-		
-		
 	}
 	  
-	 @SuppressWarnings("unchecked")
-	 public void SaveToDB(Object message) throws SQLException {
-		 	PreparedStatement ps;
+	  
+	  public Object SaveToDB(Object message) throws SQLException {
+		  
+		  	PreparedStatement ps;
 		  	Message msg = (Message)message;
-		  	ArrayList<String> data = (ArrayList<String>)msg.getContent();
+		  	ArrayList<String> data = (ArrayList<String>) msg.getContent();
 		  	
 		  	switch(msg.getCommand()) {
 		  	case InsertUser:
@@ -147,37 +148,41 @@ public class DatabaseController {
 		  	case InsertOrder:
 		  		ps = conn.prepareStatement("INSERT INTO orders "
 						+ "(order_number, customer_id, order_status, order_created,"
-						+ " location, items_in_order,price,supply_method,machine_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+						+ " location, items_in_order,credit_card_number,price,supply_method,machine_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+		  		int order_id = -1;
 		  		try 
 				{
-					ps.setInt(1, getLastId("orders", Command.ReadOrders));
+		  			order_id = getLastId("orders", Command.ReadOrders);
+					ps.setInt(1, order_id);
 					ps.setInt(2, Integer.parseInt(data.get(0))); 
 					ps.setString(3, "Pending");
 					ps.setDate(4, Date.valueOf(LocalDate.now()));
 					ps.setString(5, data.get(1));
 					ps.setString(6, data.get(2));
-					ps.setInt(7, Integer.parseInt(data.get(3)));
-					ps.setString(8, data.get(4));
-					ps.setInt(9, Integer.parseInt(data.get(5)));
+					ps.setString(7, data.get(3));
+					ps.setInt(8, Integer.parseInt(data.get(4)));
+					ps.setString(9, data.get(5));
+					ps.setInt(10, Integer.parseInt(data.get(6)));
 					ps.executeUpdate();
 					
 				} catch (SQLException e) { e.printStackTrace(); }
 		  		
 				ps = conn.prepareStatement("UPDATE machines " 
 						+ "SET amount_per_item = ?"
-						+ "WHERE machine_id = ?"); 
+						+", total_inventory = ?"
+						+ " WHERE machine_id = ?"); 
 				try {
-					ps.setString(1, data.get(6));
-					ps.setInt(2, Integer.parseInt(data.get(5)));
+					ps.setString(1, data.get(7));
+					ps.setInt(2, Integer.parseInt(data.get(8)));
+					ps.setInt(3, Integer.parseInt(data.get(6)));
 					ps.executeUpdate();
 				} catch (SQLException e) { e.printStackTrace(); }
-				//add new Total Inventory
-				break;
-		  		
-		  	case InsertOrderReport:
+				return order_id;
+				
+			case InsertOrderReport:
 		  		ps = conn.prepareStatement("INSERT INTO ordersreport "
-						+ "(report_id, machine_id, location, data, month, year)"
-						+ " VALUES (?, ?, ?, ?, ?, ?)");
+						+ "(report_id, location, data, month, year)"
+						+ " VALUES (?, ?, ?, ?, ?)");
 		  		try 
 		  		{
 		  			ps.setString(1, String.valueOf(getLastId("ordersreport", Command.InsertOrderReport)));
@@ -185,7 +190,6 @@ public class DatabaseController {
 		  			ps.setString(3, data.get(2));
 		  			ps.setString(4, data.get(3));
 		  			ps.setString(5, data.get(4));
-		  			ps.setString(6, data.get(5));
 		  			ps.executeUpdate();
 		  			
 		  		} catch (Exception e) {	e.printStackTrace();}
@@ -193,11 +197,31 @@ public class DatabaseController {
 		  		
 		  	case InsertInventoryReport:
 		  		ps=conn.prepareStatement("INSERT INTO inventoryreport "
-						+ "(machine_id, items, total_inventory, location)"
-						+ " VALUES ( ?, ?, ?, ?)");
+						+ "(report_id, machine_id, location, inventory, stock, month, year)"
+						+ " VALUES ( ?, ?, ?, ?, ?, ?, ?)");
 		  		try 
 		  		{
-		  			ps.setString(1, data.get(0));
+		  			ps.setString(1, String.valueOf(getLastId("inventoryreport", Command.InsertInventoryReport)));
+		  			ps.setString(2, data.get(0));
+		  			ps.setString(3, data.get(1));
+		  			ps.setString(4, data.get(2));
+		  			ps.setString(5, data.get(3));
+		  			ps.setString(6, data.get(4));
+		  			ps.setString(7, data.get(5));
+		  			
+		  			ps.executeUpdate();
+		  			
+		  		} catch (Exception e) {	e.printStackTrace();}
+		  		break;
+		  		
+		  	case InsertRequest:
+		  		ps=conn.prepareStatement("INSERT INTO requests "
+						+ "(request_id, customer_id, type , status)"
+						+ " VALUES (?, ?, ? , ?)");
+		  		try 
+		  		{
+		  			ps.setString(1, String.valueOf(getLastId("requests", Command.InsertRequest)));
+		  			//ps.setString(1, data.get(0));
 		  			ps.setString(2, data.get(1));
 		  			ps.setString(3, data.get(2));
 		  			ps.setString(4, data.get(3));
@@ -207,86 +231,207 @@ public class DatabaseController {
 		  		} catch (Exception e) {	e.printStackTrace();}
 		  		break;
 		  		
+		  	case InsertUsersReport:
+		  		ps=conn.prepareStatement("INSERT INTO usersreports "
+						+ "(report_id, month, year, data)"
+						+ " VALUES ( ?, ?, ?, ?)");
+		  		try 
+		  		{
+		  			ps.setString(1,String.valueOf(getLastId("usersreports",Command.InsertUsersReport)));
+		  			ps.setString(2, data.get(0));
+		  			ps.setString(3, data.get(1));
+		  			ps.setString(4, data.get(2));
+		  			ps.executeUpdate();
+		  			
+		  		} catch (Exception e) {	e.printStackTrace();}
+		  		break;
+		  		
+		  	case InsertStockRequest:
+		  		ps=conn.prepareStatement("INSERT INTO stockrequests "
+						+ "(stock_request_id, machine_id,status)"
+						+ " VALUES ( ?, ?, ?)");
+		  		try 
+		  		{
+		  			ps.setString(1, String.valueOf(getLastId("stockrequests", Command.InsertStockRequest)));
+		  			ps.setString(2, data.get(0)); //machine_id
+		  			ps.setString(3, "Pending"); //items to fill
+		  			ps.executeUpdate();
+		  			
+		  		} catch (Exception e) {	e.printStackTrace();}
+		  		break;
+		  		
+		  	case InsertDelivery:
+		  		ps = conn.prepareStatement("INSERT INTO delivery "
+						+ "(delivery_id, order_id, customer_id, shipping_date, estimated_delivery, status, total_price, location, address)"
+						+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+		  		try 
+		  		{
+		  			ps.setString(1, String.valueOf(getLastId("delivery", Command.InsertDelivery)));
+		  			ps.setString(2, data.get(0)); 
+		  			ps.setString(3, data.get(1));
+		  			ps.setDate(4, Date.valueOf(LocalDate.now())); 
+		  			ps.setDate(5, null); 
+		  			ps.setString(6, "Pending"); 
+		  			ps.setString(7, data.get(2));
+		  			ps.setString(8, data.get(3));
+		  			ps.setString(9, data.get(4));
+		  			ps.executeUpdate();
+		  			
+		  		} catch (Exception e) {	e.printStackTrace();}
+		  		break;
 		  		
 		  	default:
 		  		break;
 		  	}
-	 }
+			return null;
+		  	
+			
+
+		}
 	 
 	  public void UpdateToDB(Message details) throws SQLException {
 		    // data format = { id credit_card subscriber_num}
-		 String[] s = (String[]) details.getContent();
+		 String[] s = (String[]) details.getContent(); //problematic
 		 String TableName = s[0];
 		 PreparedStatement ps;
-		 
 		  switch (TableName)
 		  {
-			case "ordersreport":
-				ps = conn.prepareStatement("UPDATE ordersreport "
-						+ "Set data = ?"
-						+ "Where report_id = ?");
-				try {
-					ps.setString(1, s[2]);
-					ps.setString(2, s[1]);
-				
+		case "ordersupplymethod":
+			ps = conn.prepareStatement("UPDATE orders "
+					+ "Set supply_method = ?"
+					+ "Where order_number = ?");
+			try {
+				ps.setString(1, s[2]);
+				ps.setString(2, s[1]);
+			
+				ps.executeUpdate();
+			} catch (SQLException e) { e.printStackTrace(); }
+			break;
+		  
+		case "ordersreport":
+			ps = conn.prepareStatement("UPDATE ordersreport "
+					+ "Set data = ?"
+					+ "Where report_id = ?");
+			try {
+				ps.setString(1, s[2]);
+				ps.setString(2, s[1]);
+			
+				ps.executeUpdate();
+			} catch (SQLException e) { e.printStackTrace(); }
+			break;
+			
+		case "orders":
+			String[] numberAndStatusForOrder;
+			ps = conn.prepareStatement("UPDATE orders "
+					+ "SET order_status = ? "
+					+ "WHERE order_number = ?");
+			
+			try {
+				for (int i = 1; i < s.length; i++) {
+					numberAndStatusForOrder = s[i].split(" ");
+					ps.setString(1, numberAndStatusForOrder[1]);
+					ps.setInt(2, Integer.parseInt(numberAndStatusForOrder[0]));
 					ps.executeUpdate();
-				} catch (SQLException e) { e.printStackTrace(); }
-				break;
-				
-			case "delivery":
-				String[] numberAndStatus;
-				ps = conn.prepareStatement("UPDATE delivery "
-						+ "SET status = ?, estimated_delivery = ?"
-						+ "WHERE order_id = ?");
-				
-				try {
-					for (int i = 1; i < s.length; i++) {
-						numberAndStatus = s[i].split(" ");
-						ps.setString(1, numberAndStatus[1]);
-						ps.setString(2, numberAndStatus[2]);
-						ps.setInt(3, Integer.parseInt(numberAndStatus[0]));
-//						System.out.println("Updated client about current delivery. Estimated time: " + numberAndStatus[2]);
-						EchoServer.updateCommandText("Updated client about current delivery. Estimated time: " + numberAndStatus[2]);
-						
-						ps.executeUpdate();
-					}
-				} catch (SQLException e) { e.printStackTrace(); }
-				break;
-				
-			case "orders":
-				String[] numberAndStatusForOrder;
-				ps = conn.prepareStatement("UPDATE orders "
-						+ "SET order_status = ? "
-						+ "WHERE order_number = ?");
-				
-				try {
-					for (int i = 1; i < s.length; i++) {
-						numberAndStatusForOrder = s[i].split(" ");
-						ps.setString(1, numberAndStatusForOrder[1]);
-						ps.setInt(2, Integer.parseInt(numberAndStatusForOrder[0]));
-						ps.executeUpdate();
-					}
-				} catch (SQLException e) { e.printStackTrace(); }
-				break;
-				
-			case "machinesAmount":
-				ps = conn.prepareStatement("UPDATE machines "
-						+ "SET amount_per_item = ?, items = ?, total_inventory = ? "
-						+ "WHERE machine_id = ?"); 
-				try {
-					ps.setString(1, s[1]);
-					ps.setString(2, s[2]);
-					ps.setInt(3, Integer.parseInt(s[3]));
-					ps.setInt(4, Integer.parseInt(s[4]));
-					ps.executeUpdate();
+				}
+			} catch (SQLException e) { e.printStackTrace(); }
+			break;
+			
+		case "machinesAmount":
+			ps = conn.prepareStatement("UPDATE machines " 
+					+ "SET amount_per_item = ?"
+					+ "WHERE machine_id = ?"); 
+			try {
+				ps.setString(1, s[2]);
+				ps.setString(2, s[1]);
+				ps.executeUpdate();
+			} catch (SQLException e) { e.printStackTrace(); }
+			//add new Total Inventory
+			break;
+			
+		case "location":
+			ps = conn.prepareStatement("UPDATE location " 
+					+ "SET sale_value = ?"
+					+ " WHERE name = ?"); 
+			try {
+				ps.setInt(1, Integer.parseInt(s[2]));
+				ps.setString(2, s[1]);
+				ps.executeUpdate();
+			} catch (SQLException e) { e.printStackTrace(); }
+			//add new Total Inventory
+			break;
+			
+		case "machinesThreshold":
+			ps = conn.prepareStatement("UPDATE machines " 
+					+ "SET threshold = ?"
+					+ "WHERE machine_id = ?"); 
+			try {
+				ps.setString(1, s[2]);
+				ps.setString(2, s[1]);
+				ps.executeUpdate();
+			} catch (SQLException e) { e.printStackTrace(); }
+			//add new Total Inventory
+			break;
+			
+		case "usersFirstCart":
+			ps = conn.prepareStatement("UPDATE users " 
+					+ "SET is_new_subscriber = ?"
+					+ "WHERE ID = ?"); 
+			try {
+				ps.setString(1,"0");
+				ps.setString(2,s[1]);
+				ps.executeUpdate();
 			} catch (SQLException e) { e.printStackTrace(); }
 			//add new Total Inventory
 			break;
 
-		  default:
-//			System.out.println("default entered in dbcontroller");
-			EchoServer.updateCommandText("default entered in dbcontroller");
+		case "users":
+			ps = conn.prepareStatement("UPDATE users " 
+					+ "SET subscriber_number = ? , is_new_subscriber = ?" 
+					+ " WHERE ID = ?"); 
+			try {
+				ps.setInt(1,getLastId("users", Command.InsertUser));
+				ps.setInt(2, 1);
+				ps.setInt(3, Integer.parseInt(s[1]));
+				
+				ps.executeUpdate();
+			} catch (SQLException e) { e.printStackTrace(); }
+			break;
 			
+		case "delivery":
+			String[] numberAndStatus;
+			ps = conn.prepareStatement("UPDATE delivery "
+					+ "SET status = ?, estimated_delivery = ?"
+					+ "WHERE order_id = ?");
+			
+			try {
+				for (int i = 1; i < s.length; i++) {
+					numberAndStatus = s[i].split(" ");
+					ps.setString(1, numberAndStatus[1]);
+					ps.setString(2, numberAndStatus[2]);
+					ps.setInt(3, Integer.parseInt(numberAndStatus[0]));
+//					System.out.println("Updated client about current delivery. Estimated time: " + numberAndStatus[2]);
+					EchoServer.updateCommandText("Updated client about current delivery. Estimated time: " + numberAndStatus[2]);
+					
+					ps.executeUpdate();
+				}
+			} catch (SQLException e) { e.printStackTrace(); }
+			break;
+			
+		case "requests":
+			ps = conn.prepareStatement("UPDATE requests " 
+					+ "SET status = ?" 
+					+ " WHERE customer_id = ?"); 
+			try {
+				ps.setString(1, "Resolved");
+				ps.setInt(2, Integer.parseInt(s[1]));
+				
+				ps.executeUpdate();
+			} catch (SQLException e) { e.printStackTrace(); }
+			break;
+
+		default:
+//			System.out.println("default entered in dbcontroller");
+			EchoServer.updateCommandText("default entered in database controller");
 			break;
 		}
 //			PreparedStatement ps = conn.prepareStatement("UPDATE users "
@@ -295,20 +440,19 @@ public class DatabaseController {
 			
 			
 		}
+	  
+
 
 	  public ArrayList<Object> ReadFromDB(Message m) throws SQLException {
 		    Statement stmt;
 			ArrayList<Object> alldata = new ArrayList<>();
 			String query = m.getCommand().GetQuery();
-		
 			if ((int)m.getContent() != 0) 
 				query += " WHERE " + m.getCommand().GetID() + " = " + (int)m.getContent();
 			
 			try {
 				stmt = conn.createStatement();
 				ResultSet rs = stmt.executeQuery(query);
-				
-//				rs = stmt.executeQuery(query);
 				switch (m.getCommand()) {
 					case ReadMachines:
 						Machine tempM;
@@ -330,13 +474,9 @@ public class DatabaseController {
 							tempD = new Delivery();
 							tempD.setDelivery_id(rs.getInt(1));
 							tempD.setOrder_id(rs.getInt(2));
-							tempD.setCustomer_id(rs.getInt(3));
-							tempD.setShipping_date(rs.getDate(4));
-							tempD.setEstimated_Delivery(rs.getDate(5));
-							tempD.setStatus(rs.getString(6));
-							tempD.setTotal_price(rs.getInt(7));
-							tempD.setLocation(rs.getString(8));
-							tempD.setAddress(rs.getString(9));
+							tempD.setShipping_date(rs.getDate(3));
+							tempD.setEstimated_dleivery(rs.getDate(4));
+							tempD.setStatus(rs.getString(5));
 							alldata.add(tempD);
 						}
 						break;
@@ -369,6 +509,35 @@ public class DatabaseController {
 							tempSub.setIs_new_subscriber(rs.getInt(11));
 							alldata.add(tempSub);
 						}
+						break;
+						
+					case ReadUserVisa:
+						String visa = "";
+						while(rs.next())
+						{
+							visa = rs.getString(1);
+						}
+						ArrayList<Object> v = new ArrayList<Object>();
+						v.add(visa);
+						return v;
+						
+					case ReadOrders:
+						Order tempO;
+						while(rs.next()) {
+							tempO = new Order();
+							tempO.setOrder_num(rs.getInt(1));
+							tempO.setCustomer_id(rs.getInt(2));
+							tempO.setOrder_status(rs.getString(3));
+							tempO.setOrder_created(rs.getDate(4));
+							tempO.setLocation(rs.getString(5));
+							tempO.setItems_in_order(rs.getString(6));
+							tempO.setCredit_card_number(rs.getString(7));
+							tempO.setPrice(rs.getInt(8));
+							tempO.setSupply_method(rs.getString(9));
+							tempO.setMachine_id(rs.getInt(10));
+							alldata.add(tempO);
+						}
+						break;
 						
 					case ReadExternalTable:
 						Subscriber tempExternalSub;
@@ -390,23 +559,6 @@ public class DatabaseController {
 						
 						break;
 						
-					case ReadOrders:
-						Order tempO;
-						while(rs.next()) {
-							tempO = new Order();
-							tempO.setOrder_num(rs.getInt(1));
-							tempO.setCustomer_id(rs.getInt(2));
-							tempO.setOrder_status(rs.getString(3));
-							tempO.setOrder_created(rs.getDate(4));
-							tempO.setLocation(rs.getString(5));
-							tempO.setItems_in_order(rs.getString(6));
-							tempO.setPrice(rs.getInt(7));
-							tempO.setSupply_method(rs.getString(8));
-							tempO.setMachine_id(rs.getInt(9));
-							alldata.add(tempO);
-						}
-						break;
-						
 					case ReadItems:
 						Item tempI;
 						while(rs.next()) {
@@ -426,6 +578,7 @@ public class DatabaseController {
 							alldata.add(tempL);
 						}
 						break;
+						
 					
 					case ReadOrdersReports:
 						OrdersReports tempRorders;
@@ -450,14 +603,30 @@ public class DatabaseController {
 							tempRstock.setStock_request_id(rs.getInt(1));
 							tempRstock.setMachine_id(rs.getInt(2));
 							tempRstock.setStatus(rs.getString(3));
-							tempRstock.setResolved_date(rs.getDate(4));
 							alldata.add(tempRstock);
 						}
 						break;
 						
+					case ReadInventoryReports:
+						InventoryReports tempInventoryReport;
+						while(rs.next())
+						{
+							tempInventoryReport = new InventoryReports();
+							tempInventoryReport.setReport_id(rs.getInt(1));
+							tempInventoryReport.setMachine_id(rs.getInt(2));
+							tempInventoryReport.setLocation(rs.getString(3));
+							tempInventoryReport.setInventory(rs.getString(4));
+							tempInventoryReport.setStock(rs.getString(5));
+							tempInventoryReport.setMonth(rs.getString(6));
+							tempInventoryReport.setYear(rs.getString(7));
+							alldata.add(tempInventoryReport);
+						}
+						break;
+
+						
 					default:
-//						System.out.println("Dude what");
-						EchoServer.updateCommandText("Dude what");
+//						System.out.println("Reached default in database controller");
+						EchoServer.updateCommandText("Reached default in database controller");
 						return null;
 							
 				}
@@ -468,14 +637,22 @@ public class DatabaseController {
 			return alldata;
 	   }
 	  
-	  public String[] ConnectToServer(String username) throws SQLException {
+	  public String[] ConnectToServer(String str , int flag) throws SQLException {
 			Statement stmt;
 			String password = null;
-			String[] passRoleFnameSubNumFirstCart = new String[5];
+			String value;
+			String[] passRoleFnameSubNumFirstCart = new String[6];
+			if(flag==1)
+			{
+				value = "user_name";
+			}
+			else 
+				value = "ID";
 			try 
 			{
+			
 				stmt = conn.createStatement();
-				ResultSet rs = stmt.executeQuery("SELECT password,role,first_name,subscriber_number,is_new_subscriber FROM users Where user_name = \""+ username +"\"");
+				ResultSet rs = stmt.executeQuery("SELECT password,role,first_name,subscriber_number,is_new_subscriber,ID FROM users Where " +value +" = \""+ str +"\"");
 		 		if(!rs.next())
 		 			return new String[] {"","",""};
 				passRoleFnameSubNumFirstCart[0] = rs.getString(1);
@@ -483,14 +660,15 @@ public class DatabaseController {
 		 		passRoleFnameSubNumFirstCart[2] = rs.getString(3);
 		 		passRoleFnameSubNumFirstCart[3] = rs.getString(4);
 		 		passRoleFnameSubNumFirstCart[4] = rs.getString(5);
-				
+		 		passRoleFnameSubNumFirstCart[5] = rs.getString(6);
+
 				rs.close();
 			} catch (SQLException e) { e.printStackTrace(); }
 			
 			return passRoleFnameSubNumFirstCart;
 	   }
 	  
-	   public static synchronized DatabaseController GetFunctionsInstance(String databasePassword) {
+	  public static synchronized DatabaseController GetFunctionsInstance(String databasePassword) {
 		   return ( DBFunctionsInstance == null ) ? new DatabaseController(databasePassword) : DBFunctionsInstance;
 	   }
 	   
@@ -517,4 +695,6 @@ public class DatabaseController {
 		   return lastID;
 		   
 	   }
+	   
+	   
 }

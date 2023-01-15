@@ -34,6 +34,8 @@ public class ServerInfoController implements Initializable {
 	private PasswordField databasePasswordtxt;
 	@FXML
 	private Button startServerbtn;
+	@FXML
+	private Button importUsersBtn;
 	
 	@FXML
 	public TextArea screen;
@@ -91,6 +93,7 @@ public class ServerInfoController implements Initializable {
 		LoadTable();
 	}
 	
+	
 	public void RunServerBtn() {
 		// on click, change button color to #373057
 		if (serverPortxt.getText().equals("")) {
@@ -100,15 +103,8 @@ public class ServerInfoController implements Initializable {
 		
 		String[] args = {serverPortxt.getText(), databasePasswordtxt.getText()};
 		EchoServer.runServer(args);
-		LockUnlock(true);
+//		LockUnlock(true);
 		ranServerAlready = true;	
-	}
-	
-	private void LockUnlock(boolean condition) {
-		serverIptxt.setDisable(condition);
-		serverPortxt.setDisable(condition);
-		databasePasswordtxt.setDisable(condition);
-		startServerbtn.setDisable(condition);
 	}
 	
 	public void RefreshClientsBtn() {
@@ -117,6 +113,13 @@ public class ServerInfoController implements Initializable {
 		data = FXCollections.observableArrayList(EchoServer.users);
 		table.setItems(data);
 	}
+	
+//	private void LockUnlock(boolean condition) {
+//		serverIptxt.setDisable(condition);
+//		serverPortxt.setDisable(condition);
+//		databasePasswordtxt.setDisable(condition);
+//		startServerbtn.setDisable(condition);
+//	}
 	
 	public void LoadTable() {
 		colIp.setCellValueFactory(new PropertyValueFactory<>("Ip"));
@@ -135,7 +138,13 @@ public class ServerInfoController implements Initializable {
 		dbController.ImportExternalUsers();
 //		System.out.println("Imported Users successfully.");
 		EchoServer.updateCommandText("Imported Users successfully.");
+		importUsersBtn.setDisable(true);
 	}
+	
+//	public void PrintConsole(String msg1) {
+//		screen.appendText(msg1 + "\n");
+//			
+//	}
 	
 	public void QuitBtn() {
 		System.exit(0);

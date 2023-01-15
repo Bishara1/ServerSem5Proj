@@ -60,7 +60,7 @@
          </font>
       </Label>
       <TextField fx:id="serverPortxt" layoutX="139.0" layoutY="214.0" prefHeight="31.0" prefWidth="161.0" />
-      <Button layoutX="69.0" layoutY="382.0" mnemonicParsing="false" onAction="#RefreshClientsBtn" prefHeight="36.0" prefWidth="225.0" style="-fx-background-color: #c14302;" text="Refresh Clients" textFill="WHITE">
+      <Button layoutX="69.0" layoutY="382.0" mnemonicParsing="false" onAction="#RefreshClientsBtn" prefHeight="45.0" prefWidth="225.0" style="-fx-background-color: #c14302;" text="Refresh Clients" textFill="WHITE">
          <font>
             <Font size="21.0" />
          </font>
@@ -71,11 +71,16 @@
          </font>
       </Label>
       <PasswordField fx:id="databasePasswordtxt" layoutX="139.0" layoutY="260.0" prefHeight="31.0" prefWidth="161.0" />
-      <TextArea fx:id="screen" layoutX="340.0" layoutY="324.0" prefHeight="234.0" prefWidth="420.0" promptText="Waiting for connection ..." />
-      <Button layoutX="69.0" layoutY="446.0" mnemonicParsing="false" onAction="#ImportUsersBtn" prefHeight="36.0" prefWidth="225.0" style="-fx-background-color: #c14302;" text="Import Data" textFill="WHITE">
+      <TextArea fx:id="screen" editable="false" layoutX="340.0" layoutY="335.0" prefHeight="223.0" prefWidth="420.0" promptText="Waiting for connection ..." style="-fx-font-size: 15px;" />
+      <Button fx:id="importUsersBtn" layoutX="69.0" layoutY="446.0" mnemonicParsing="false" onAction="#ImportUsersBtn" prefHeight="36.0" prefWidth="225.0" style="-fx-background-color: #c14302;" text="Import Data" textFill="WHITE">
          <font>
             <Font size="21.0" />
          </font>
       </Button>
+      <Label layoutX="504.0" layoutY="303.0" text="Console" textFill="#c14302">
+         <font>
+            <Font name="System Bold Italic" size="23.0" />
+         </font>
+      </Label>
    </children>
 </AnchorPane>

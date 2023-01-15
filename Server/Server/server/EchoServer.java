@@ -11,6 +11,7 @@ import java.util.ArrayList;
 
 import logic.Connected;
 import logic.Delivery;
+import logic.InventoryReports;
 import logic.Item;
 import logic.Location;
 import logic.Machine;
@@ -38,9 +39,12 @@ import common.Message;
  */
 public class EchoServer extends AbstractServer { 
 	private DatabaseController dbController;
-	public static boolean isConnectedToDatabase = false;
+	//private ArrayList<> ******************************************************
 	public static ArrayList<Connected> users = new ArrayList<Connected>();
 	private static String databasePassword = null;
+	private Thread reportThread;
+	public static boolean isConnectedToDatabase = false;
+	
   //Class variables *************************************************
   
   /**
@@ -104,9 +108,9 @@ public class EchoServer extends AbstractServer {
 	  dbController = DatabaseController.GetFunctionsInstance(databasePassword);
 	  if (dbController.IsConnectedToDB())
 		  isConnectedToDatabase = true;
-	  
-//	  System.out.println("Server listening for connections on port " + getPort());
 	  updateCommandText("Server listening for connections on port " + getPort());
+	  reportThread = new Thread(new ReportsThread(dbController));
+	  reportThread.start();
   }
   
   /**
@@ -120,10 +124,10 @@ public class EchoServer extends AbstractServer {
   
   @Override
   protected void clientConnected(ConnectionToClient client) {
-//	  ArrayList<String> info = new ArrayList<>();
-//	  info.add(client.getInetAddress().toString());
-//	  System.out.println("Connected");
-//	  updateCommandText("Connected");
+	  ArrayList<String> info = new ArrayList<>();
+	  info.add(client.getInetAddress().toString());
+	  System.out.println("Connected");
+	  updateCommandText("Connected");
   }
   
   public static void updateCommandText(String message) {
@@ -195,9 +199,77 @@ public class EchoServer extends AbstractServer {
 				  break;
 				  
 			  case UpdateMachineStock:
-				  dbController.UpdateToDB(data);
+				  ArrayList<String> update = ((ArrayList<String>)data.getContent()); // get content
+				  String newAmount = "";
+				  for(int i = 1;i<update.size();i++)
+				  {
+					  newAmount += update.get(i);
+					  if(i != update.size()-1)
+					  	newAmount += ",";
+				  }
+				  update.add(0, "machinesAmount");
+				  String[] param = new String[3];
+				  param[0] = "machinesAmount";
+				  param[1] = update.get(1);
+				  param[2] = newAmount;
+				  Message msg1 = new Message(param,Command.UpdateMachineStock);
+				  dbController.UpdateToDB(msg1);
 				  response.setCommand(Command.UpdateMachineStock);
-				  response.setContent(null);
+				  client.sendToClient(response);
+				  break;
+				  
+			  case UpdateMachineThreshold:
+				  ArrayList<String> threshold = ((ArrayList<String>)data.getContent());
+				  String[] thresh = new String[3];
+				  thresh[0] = threshold.get(0);
+				  thresh[1] = threshold.get(1);
+				  thresh[2] = threshold.get(2);
+				  Message msg3 = new Message(null,null);
+				  msg3.setContent(thresh);
+				  msg3.setCommand(Command.UpdateMachineThreshold);
+				  dbController.UpdateToDB(msg3);
+				  response.setCommand(Command.UpdateMachineThreshold);
+				  client.sendToClient(response);
+				  break;
+				  
+			  case UpdateUserFirstCart:
+				  ArrayList<String> userFirst = (ArrayList<String>) data.getContent();
+				  String[] updated = new String[3];
+				  updated[0] = userFirst.get(0);
+				  updated[1] = userFirst.get(1);
+				  updated[2] = userFirst.get(2);
+				  Message msg2 = new Message(null,null);
+				  msg2.setContent(updated);
+				  msg2.setCommand(Command.UpdateUserFirstCart);
+				  dbController.UpdateToDB(msg2);
+				  response.setCommand(Command.UpdateUserFirstCart);
+				  client.sendToClient(response);
+				  break;
+				  
+				  
+				  
+			  case EKTConnect:
+				  boolean found1 = false;
+				  ArrayList<Subscriber> temp1 = new ArrayList<Subscriber>();
+				  
+				  for (Connected Client : users) {
+					  if (Client.getIp().equals(client.toString().split(" ")[1])) {
+						  users.get(users.indexOf(Client)).setStatus("Connected");
+						  found1 = true;
+						  break;
+					  }
+			  	  }
+				  if(found1 == false)
+				  {
+					  String[] ip = client.toString().split(" ");
+					  users.add(new Connected(ip[0],String.valueOf(this.getPort()),"Connected"));
+					  
+				  }
+				  String id=(String)data.getContent();
+				
+				  String[] passRoleFnameID= dbController.ConnectToServer(id ,0);
+				  response.setContent(passRoleFnameID);
+				  response.setCommand(Command.Connect);
 				  client.sendToClient(response);
 				  break;
 	
@@ -236,7 +308,7 @@ public class EchoServer extends AbstractServer {
 				  }
 				  
 				  String username = (String)data.getContent();
-				  String[] passRoleFname = dbController.ConnectToServer(username);
+				  String[] passRoleFname = dbController.ConnectToServer(username, 1);
 				  response.setContent(passRoleFname);
 				  response.setCommand(Command.Connect);
 				  client.sendToClient(response);
@@ -248,7 +320,8 @@ public class EchoServer extends AbstractServer {
 						  users.get(users.indexOf(Client)).setStatus("Disconnected");
 						  break;
 					  }
-				  }
+				  }  
+				  
 				  
 			  	  response.setCommand(Command.Disconnect);
 			  	  client.sendToClient(response);
@@ -266,6 +339,17 @@ public class EchoServer extends AbstractServer {
 				   //loop was taking too long -> looked like it was crashing
 				   client.sendToClient(response);
 				   break;
+				   
+				   
+			   case ReadUserVisa:
+		    	   response.setCommand(Command.ReadUserVisa);
+		    	   GottenDatabase = dbController.ReadFromDB(data);
+		    	   String visa = (String)GottenDatabase.get(0);
+		    	   Message msgVisa = new Message(visa,Command.ReadUserVisa);
+		    	   client.sendToClient(msgVisa);
+		    	   break;
+		    	   
+		    	   
 				   
 			    case ReadDeliveries:
 				   response.setCommand(Command.ReadDeliveries);
@@ -355,6 +439,13 @@ public class EchoServer extends AbstractServer {
 					dbController.SaveToDB(data);
 			    	client.sendToClient(response);
 			    	break;
+			    	
+			    case InsertRequest:
+			    	response.setCommand(Command.InsertRequest);
+			    	response.setContent(0);
+			    	dbController.SaveToDB(data);
+			    	client.sendToClient(response);
+			    	break;
 						  
 			    case ReadLocations:
 			    	response.setCommand(Command.ReadLocations);
@@ -397,10 +488,52 @@ public class EchoServer extends AbstractServer {
 			    	client.sendToClient(response);
 			    	break;
 			    	
+			    case ReadInventoryReports:
+			    	response.setCommand(Command.ReadInventoryReports);
+			    	GottenDatabase = dbController.ReadFromDB(data);
+			    	
+			    	ArrayList<InventoryReports> inventory = new ArrayList<>();
+			    	for (Object obj : GottenDatabase)
+			    		inventory.add((InventoryReports)obj);
+					
+			    	response.setContent(inventory);
+			    	client.sendToClient(response);
+			    	break;
+			    	
+			    	
 			    case InsertStockRequest:
 			    	response.setCommand(Command.InsertStockRequest);
 			    	response.setContent(0);
 			    	dbController.SaveToDB(data);
+			    	client.sendToClient(response);
+			    	break;
+			    	
+			    case InsertDelivery:
+			    	response.setCommand(Command.InsertDelivery);
+			    	response.setContent(0);
+			    	dbController.SaveToDB(data);
+			    	client.sendToClient(response);
+			    	break;
+			    	
+			    case UpdateDiscount:
+			    	dbController.UpdateToDB(data);
+			    	response.setCommand(Command.UpdateDiscount);
+					response.setContent("");
+
+					client.sendToClient(response);
+					break;
+					
+			    case UpdateUsers:
+			    	dbController.UpdateToDB(data);
+			    	response.setCommand(Command.UpdateUsers);
+			    	response.setContent("");
+			    	client.sendToClient(response);
+			    	break;
+			    	
+			    case UpdateRequest:
+			    	dbController.UpdateToDB(data);
+			    	response.setCommand(Command.UpdateRequest);
+			    	response.setContent("");
 			    	client.sendToClient(response);
 			    	break;
 			    	
