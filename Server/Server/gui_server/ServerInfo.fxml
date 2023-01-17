@@ -27,7 +27,7 @@
             <Font name="System Bold Italic" size="15.0" />
          </font>
       </Label>
-      <TextField fx:id="serverIptxt" layoutX="289.0" layoutY="174.0" prefHeight="31.0" prefWidth="161.0" />
+      <TextField fx:id="serverIptxt" editable="false" layoutX="289.0" layoutY="174.0" prefHeight="31.0" prefWidth="161.0" />
       <Button fx:id="startServerbtn" layoutX="219.0" layoutY="328.0" mnemonicParsing="false" onAction="#RunServerBtn" prefHeight="45.0" prefWidth="225.0" stylesheets="@../../../../CommonSem5Proj/Common/Common/css/buttons.css" text="Start Server" textFill="WHITE">
          <font>
             <Font size="21.0" />
