@@ -20,6 +20,7 @@ import logic.Machine;
 import logic.Order;
 import logic.OrdersReports;
 import logic.Subscriber;
+import logic.UsersReports;
 import logic.Request;
 import logic.StockRequest;
 import databaselogic.DatabaseController;
@@ -296,6 +297,8 @@ public class EchoServer extends AbstractServer {
 				  response.setCommand(Command.InsertUser);
 				  client.sendToClient(response);
 				  break;
+				  
+				  
 	
 			  case Disconnect:
 				  for (Connected dClients : users) {
@@ -519,7 +522,7 @@ public class EchoServer extends AbstractServer {
 			    	response.setContent(reports);
 			    	client.sendToClient(response);
 			    	break;
-
+			    	
 			    case UpdateOrders:
 			    	response.setCommand(Command.UpdateOrders);
 			    	response.setContent(null);

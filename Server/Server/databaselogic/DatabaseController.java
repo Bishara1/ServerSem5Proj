@@ -510,6 +510,19 @@ public class DatabaseController {
 						}
 						break;
 						
+					case ReadUserReports:
+						UsersReports userReport;
+						while(rs.next())
+						{
+							userReport = new UsersReports();
+							userReport.setReport_id(rs.getInt(1));
+							userReport.setMonth(rs.getString(2));
+							userReport.setYear(rs.getString(3));
+							userReport.setData(rs.getString(4));
+							alldata.add(userReport);
+						}
+						break;
+						
 					case ReadUsers:
 						Subscriber tempSub;
 						while(rs.next()) {
