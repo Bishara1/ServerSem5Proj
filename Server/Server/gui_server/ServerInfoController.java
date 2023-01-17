@@ -50,6 +50,8 @@ public class ServerInfoController implements Initializable {
 	public TableColumn<Connected, String> colHost;
 	@FXML
 	public TableColumn<Connected, String> colStatus;
+	@FXML
+	public TableColumn<Connected, String> colUserID;
 	
 	private ObservableList<Connected> data;
 	
@@ -125,6 +127,7 @@ public class ServerInfoController implements Initializable {
 		colIp.setCellValueFactory(new PropertyValueFactory<>("Ip"));
 		colHost.setCellValueFactory(new PropertyValueFactory<>("Host"));
 		colStatus.setCellValueFactory(new PropertyValueFactory<>("Status"));
+		colUserID.setCellValueFactory(new PropertyValueFactory<>("connectedUserID"));
 	}
 	
 	public void ImportUsersBtn() {

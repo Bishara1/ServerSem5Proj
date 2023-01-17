@@ -272,6 +272,7 @@ public class ReportsThread implements Runnable {
 		try {
 			String monthStr = String.valueOf(month);
 			String yearStr = String.valueOf(year);
+			int cnt0 = 0;
 			int cnt1 = 0;
 			int cnt2 = 0;
 			int cnt3 = 0;
@@ -295,7 +296,9 @@ public class ReportsThread implements Runnable {
 			objects = db.ReadFromDB(messageToServer); 
 			for(Object obj : objects)
 			{
-				orders.add((Order)obj);
+				if(((Order)obj).getOrder_created().getMonth() == month && ((Order)obj).getOrder_created().getYear() == year)
+					orders.add((Order)obj);
+				//test if order is in the month thats specified
 			}
 			
 			int ordersCount = 0;
@@ -305,7 +308,9 @@ public class ReportsThread implements Runnable {
 				{
 					ordersCount = findUserOrdersCount(user.getId(),orders);
 					
-					if ((ordersCount >= 0) && (ordersCount <= 5))
+					if (ordersCount == 0)
+						cnt0++;
+					if ((ordersCount > 0) && (ordersCount <= 5))
 						cnt1++;
 					if ((ordersCount > 5) && (ordersCount <= 10))
 						cnt2++;
@@ -317,7 +322,7 @@ public class ReportsThread implements Runnable {
 						cnt5++;
 				}
 			}
-			String data = cnt1 + "," + cnt2 + "," + cnt3 + "," + cnt4 + "," + cnt5;
+			String data = cnt0 + "," + cnt1 + "," + cnt2 + "," + cnt3 + "," + cnt4 + "," + cnt5;
 			orderToServer.setCommand(Command.InsertUsersReport);
 			ArrayList<String> newReport = new ArrayList<String>(Arrays.asList(monthStr,yearStr,data));
 			orderToServer.setContent(newReport);

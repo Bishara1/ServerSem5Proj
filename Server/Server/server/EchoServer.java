@@ -9,6 +9,8 @@ import java.net.UnknownHostException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+import com.mysql.cj.xdevapi.Client;
+
 import logic.Connected;
 import logic.Delivery;
 import logic.InventoryReports;
@@ -124,10 +126,10 @@ public class EchoServer extends AbstractServer {
   
   @Override
   protected void clientConnected(ConnectionToClient client) {
-	  ArrayList<String> info = new ArrayList<>();
-	  info.add(client.getInetAddress().toString());
-	  System.out.println("Connected");
-	  updateCommandText("Connected");
+//	  ArrayList<String> info = new ArrayList<>();
+//	  info.add(client.getInetAddress().toString());
+//	  System.out.println("Connected");
+	  updateCommandText("New client connected");
   }
   
   public static void updateCommandText(String message) {
@@ -182,6 +184,132 @@ public class EchoServer extends AbstractServer {
 		  switch(data.getCommand()) 
 		  {
 		  
+			  case Connect:
+				  response.setCommand(Command.Connect);
+				  boolean found = false;
+				  boolean connected = false;
+				  int userID;
+				  String[] usernamePassword = (String[])data.getContent();
+				  String[] passRoleFname = dbController.ConnectToServer(usernamePassword[0], 1);
+				  
+				  if (!usernamePassword[1].equals(passRoleFname[0])) {
+					  String[] nulls = new String[] {"-1", "-1", "-1", "-1", "-1", "-1"};
+					  response.setContent(nulls);
+					  client.sendToClient(response);
+					  break;
+				  }
+				  
+				  //Check if user is already connected
+				  //Then check add IP AND user
+				  for (Connected Client : users) {
+					  if (Client.getConnectedUserID() == Integer.parseInt(passRoleFname[5]) && Client.getStatus().equals("Connected")) {
+						  connected = true;
+						  break;
+					  }
+			  	  }
+				  
+				  if(connected == true)
+				  {
+					  passRoleFname[0] = "User already connected";
+					  response.setContent(passRoleFname);
+					  response.setCommand(Command.Connect);
+					  client.sendToClient(response);
+				  	  break;
+				  }
+				  
+				  for (Connected Client : users) {
+					  if (Client.getConnectedUserID() == Integer.parseInt(passRoleFname[5]) && Client.getStatus().equals("Disconnected")) {
+						  users.get(users.indexOf(Client)).setStatus("Connected");
+						  found = true;
+						  break;
+					  }
+			  	  }
+				  
+				  if(found == false)
+				  {
+					  userID = Integer.parseInt(passRoleFname[5]);
+					  String[] ip = client.toString().split(" ");
+					  
+					  users.add(new Connected(ip[0],String.valueOf(this.getPort()),"Connected", userID));
+				  }
+				 
+				  
+				  response.setContent(passRoleFname);
+				  response.setCommand(Command.Connect);
+				  client.sendToClient(response);
+			  	  break;
+				  
+			  case EKTConnect:
+				  int userIdEKT;
+				  boolean found1 = false;
+				  boolean connected1 = false;
+				  String id= (String)data.getContent();
+				  String[] passRoleFnameID = dbController.ConnectToServer(id ,0);
+				  
+				  for (Connected Client : users) {
+					  if (Client.getConnectedUserID() == Integer.parseInt(passRoleFnameID[5]) && Client.getStatus().equals("Connected")) {
+						  connected1 = true;
+						  break;
+					  }
+			  	  }
+				  
+				  for (Connected Client : users) {
+					  if (Client.getConnectedUserID() == Integer.parseInt(passRoleFnameID[5]) && Client.getStatus().equals("Disconnected")) {
+						  users.get(users.indexOf(Client)).setStatus("Connected");
+						  found1 = true;
+						  break;
+					  }
+			  	  }
+				  
+				  if(connected1 == true)
+				  {
+					  passRoleFnameID[0] = "User already connected";
+					  response.setContent(passRoleFnameID);
+					  response.setCommand(Command.Connect);
+					  client.sendToClient(response);
+				  	  break;
+				  }
+				  
+				  if(found1 == false)
+				  {
+					  userID = Integer.parseInt(passRoleFnameID[5]);
+					  String[] ip1 = client.toString().split(" ");
+					  users.add(new Connected(ip1[0],String.valueOf(this.getPort()),"Connected", userID));
+				  }
+				  
+				  response.setContent(passRoleFnameID);
+				  response.setCommand(Command.Connect);
+				  client.sendToClient(response);
+			  	  break;
+	
+			  case InsertUser:
+				  Message m = new Message(null, null);
+				  String[] insertToDB = ((String)data.getContent()).split(" ");
+				  ArrayList<String> toDB=new ArrayList<>();
+				  for(String s: insertToDB)
+				  {
+					  toDB.add(s);
+				  }
+				  m.setCommand(Command.InsertUser);
+				  m.setContent(toDB);
+				  dbController.SaveToDB(m);
+				  response.setCommand(Command.InsertUser);
+				  client.sendToClient(response);
+				  break;
+	
+			  case Disconnect:
+				  for (Connected dClients : users) {
+					  if (dClients.getConnectedUserID() == (int)data.getContent() && dClients.getIp().equals(client.toString().split(" ")[0])) {
+						  users.get(users.indexOf(dClients)).setStatus("Disconnected");
+						  break;
+					  }
+				  }  
+				  
+				  response.setCommand(Command.Disconnect);
+				  response.setContent(null);
+				  client.sendToClient(response);
+				  break;
+		  
 			  case DatabaseUpdate:
 				  ArrayList<String> change = (ArrayList<String>) data.getContent();
 				  String str = "";
@@ -199,22 +327,9 @@ public class EchoServer extends AbstractServer {
 				  break;
 				  
 			  case UpdateMachineStock:
-				  ArrayList<String> update = ((ArrayList<String>)data.getContent()); // get content
-				  String newAmount = "";
-				  for(int i = 1;i<update.size();i++)
-				  {
-					  newAmount += update.get(i);
-					  if(i != update.size()-1)
-					  	newAmount += ",";
-				  }
-				  update.add(0, "machinesAmount");
-				  String[] param = new String[3];
-				  param[0] = "machinesAmount";
-				  param[1] = update.get(1);
-				  param[2] = newAmount;
-				  Message msg1 = new Message(param,Command.UpdateMachineStock);
-				  dbController.UpdateToDB(msg1);
+				  dbController.UpdateToDB(data);
 				  response.setCommand(Command.UpdateMachineStock);
+				  response.setContent(null);
 				  client.sendToClient(response);
 				  break;
 				  
@@ -246,86 +361,19 @@ public class EchoServer extends AbstractServer {
 				  client.sendToClient(response);
 				  break;
 				  
-				  
-				  
-			  case EKTConnect:
-				  boolean found1 = false;
-				  ArrayList<Subscriber> temp1 = new ArrayList<Subscriber>();
-				  
-				  for (Connected Client : users) {
-					  if (Client.getIp().equals(client.toString().split(" ")[1])) {
-						  users.get(users.indexOf(Client)).setStatus("Connected");
-						  found1 = true;
-						  break;
-					  }
-			  	  }
-				  if(found1 == false)
-				  {
-					  String[] ip = client.toString().split(" ");
-					  users.add(new Connected(ip[0],String.valueOf(this.getPort()),"Connected"));
-					  
-				  }
-				  String id=(String)data.getContent();
-				
-				  String[] passRoleFnameID= dbController.ConnectToServer(id ,0);
-				  response.setContent(passRoleFnameID);
-				  response.setCommand(Command.Connect);
-				  client.sendToClient(response);
-				  break;
-	
-			  case InsertUser:
-				  Message m = new Message(null, null);
-				  String[] insertToDB = ((String)data.getContent()).split(" ");
-				  ArrayList<String> toDB=new ArrayList<>();
-				  for(String s: insertToDB)
-				  {
-					  toDB.add(s);
-				  }
-				  m.setContent(toDB);
-				  dbController.SaveToDB(m);
-				  response.setCommand(Command.InsertUser);
-				  client.sendToClient(response);
-				  break;
-				 
-				  
-			  case Connect:
-				  boolean found = false;
-				  ArrayList<Subscriber> temp = new ArrayList<Subscriber>();
-				  
-				  for (Connected Client : users) {
-					  if (Client.getIp().equals(client.toString().split(" ")[1])) {
-						  users.get(users.indexOf(Client)).setStatus("Connected");
-						  found = true;
-						  break;
-					  }
-			  	  }
-				  
-				  if(found == false)
-				  {
-					  String[] ip = client.toString().split(" ");
-					  users.add(new Connected(ip[0],String.valueOf(this.getPort()),"Connected"));
-					  
-				  }
-				  
-				  String username = (String)data.getContent();
-				  String[] passRoleFname = dbController.ConnectToServer(username, 1);
-				  response.setContent(passRoleFname);
-				  response.setCommand(Command.Connect);
-				  client.sendToClient(response);
-			  	  break;
-	
-			  case Disconnect:
-				  for (Connected Client : users) {
-					  if (Client.getIp().equals(client.toString().split(" ")[1])) {
-						  users.get(users.indexOf(Client)).setStatus("Disconnected");
-						  break;
-					  }
-				  }  
-				  
-				  
-			  	  response.setCommand(Command.Disconnect);
-			  	  client.sendToClient(response);
-			  	  break;
+			   case UpdateOrderSupplyMethod:
+				   ArrayList<String> orderSupplyMethod = (ArrayList<String>) data.getContent();
+				   String[] supplyMethod = new String[3];
+				   supplyMethod[0] = orderSupplyMethod.get(0);
+				   supplyMethod[1] = orderSupplyMethod.get(1);
+				   supplyMethod[2] = orderSupplyMethod.get(2);
+				   Message supplyMsg = new Message(null,null);
+				   supplyMsg.setContent(supplyMethod);
+				   supplyMsg.setCommand(Command.UpdateOrderSupplyMethod);
+				   dbController.UpdateToDB(supplyMsg);
+				   response.setCommand(Command.UpdateOrderSupplyMethod);
+				   client.sendToClient(response);
+				   break;
 			  	  
 			   case ReadMachines:
 				   response.setCommand(Command.ReadMachines);
@@ -421,8 +469,8 @@ public class EchoServer extends AbstractServer {
 						   
 			    case InsertOrder:
 		    		response.setCommand(Command.InsertOrder);
-		    		response.setContent(0);
-		    		dbController.SaveToDB(data);
+		    		int order = (int)dbController.SaveToDB(data);
+		    		response.setContent(order);
 					client.sendToClient(response);
 					break;
 					

@@ -54,8 +54,7 @@ public class DatabaseController {
 		  try {
 		      Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
 //		      System.out.println("Driver definition succeed");
-		      EchoServer.updateCommandText("Driver definition succeed");
-		      
+		      EchoServer.updateCommandText("Driver definition succeed");  
 		  } catch (Exception ex) {
 			  /* handle the error*/
 //			  sic.screen.setText("Driver definition failed");
@@ -128,22 +127,31 @@ public class DatabaseController {
 		  	ArrayList<String> data = (ArrayList<String>) msg.getContent();
 		  	
 		  	switch(msg.getCommand()) {
-		  	case InsertUser:
-		  	ps = conn.prepareStatement("INSERT INTO users "
-						+ "(first_name, last_name, id, phone_number, email_address,"
-						+ " credit_card_number, subscriber_number,user_name,password,role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,?)");
-				try 
-				{
-					for (int i = 1; i < 11; i++)
-					{	if ((i==3) || (i==7))
-							ps.setInt(i, Integer.parseInt(data.get(i-1)));
-					else
-						ps.setString(i, data.get(i-1));
-					}
-					
-//					ps.executeQuery();
-					ps.executeUpdate();
-				} catch (SQLException e) { e.printStackTrace(); }
+			  	case InsertUser:
+				  	ps = conn.prepareStatement("INSERT INTO users "
+								+ "(first_name, last_name, id, phone_number, email_address,"
+								+ " credit_card_number, subscriber_number,user_name,password,role,is_new_subscriber) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,?,?)");
+						try 
+						{
+							/*
+							 * for (int i = 1; i < 11; i++) { if ((i==3) || (i==7)) ps.setInt(i,
+							 * Integer.parseInt(data.get(i-1))); else ps.setString(i, data.get(i-1)); }
+							 */
+	//						ps.executeQuery();
+							ps.setString(1, data.get(0));
+							ps.setString(2, data.get(1));
+							ps.setInt(3,Integer.parseInt(data.get(2)));
+							ps.setString(4, data.get(3));
+							ps.setString(5, data.get(4));
+							ps.setString(6, data.get(5));
+							ps.setInt(7,-1);
+							ps.setString(8, data.get(7));
+							ps.setString(9, data.get(8));
+							ps.setString(10, data.get(9));
+							ps.setInt(11, 0);
+							ps.executeUpdate();
+						} catch (SQLException e) { e.printStackTrace(); }
+						break;
 		  		
 		  	case InsertOrder:
 		  		ps = conn.prepareStatement("INSERT INTO orders "
@@ -155,7 +163,10 @@ public class DatabaseController {
 		  			order_id = getLastId("orders", Command.ReadOrders);
 					ps.setInt(1, order_id);
 					ps.setInt(2, Integer.parseInt(data.get(0))); 
-					ps.setString(3, "Pending");
+					if(data.get(5).equals("Immediate pickup"))
+						ps.setString(3, "Completed");
+					else
+						ps.setString(3, "Pending");
 					ps.setDate(4, Date.valueOf(LocalDate.now()));
 					ps.setString(5, data.get(1));
 					ps.setString(6, data.get(2));
@@ -298,7 +309,7 @@ public class DatabaseController {
 		  {
 		case "ordersupplymethod":
 			ps = conn.prepareStatement("UPDATE orders "
-					+ "Set supply_method = ?"
+					+ "Set order_status = ?"
 					+ "Where order_number = ?");
 			try {
 				ps.setString(1, s[2]);
@@ -337,16 +348,18 @@ public class DatabaseController {
 			break;
 			
 		case "machinesAmount":
-			ps = conn.prepareStatement("UPDATE machines " 
-					+ "SET amount_per_item = ?"
+			ps = conn.prepareStatement("UPDATE machines "
+					+ "SET amount_per_item = ?, items = ?, total_inventory = ? "
 					+ "WHERE machine_id = ?"); 
 			try {
-				ps.setString(1, s[2]);
-				ps.setString(2, s[1]);
+				ps.setString(1, s[1]);
+				ps.setString(2, s[2]);
+				ps.setInt(3, Integer.parseInt(s[3]));
+				ps.setInt(4, Integer.parseInt(s[4]));
 				ps.executeUpdate();
-			} catch (SQLException e) { e.printStackTrace(); }
-			//add new Total Inventory
-			break;
+		} catch (SQLException e) { e.printStackTrace(); }
+		//add new Total Inventory
+		break;
 			
 		case "location":
 			ps = conn.prepareStatement("UPDATE location " 
@@ -474,9 +487,13 @@ public class DatabaseController {
 							tempD = new Delivery();
 							tempD.setDelivery_id(rs.getInt(1));
 							tempD.setOrder_id(rs.getInt(2));
-							tempD.setShipping_date(rs.getDate(3));
-							tempD.setEstimated_dleivery(rs.getDate(4));
-							tempD.setStatus(rs.getString(5));
+							tempD.setCustomer_id(rs.getInt(3));
+							tempD.setShipping_date(rs.getDate(4));
+							tempD.setEstimated_Delivery(rs.getDate(5));
+							tempD.setStatus(rs.getString(6));
+							tempD.setTotal_price(rs.getInt(7));
+							tempD.setLocation(rs.getString(8));
+							tempD.setAddress(rs.getString(9));
 							alldata.add(tempD);
 						}
 						break;
@@ -488,6 +505,7 @@ public class DatabaseController {
 							tempR.setRequest_id(rs.getInt(1));
 							tempR.setCustomer_id(rs.getInt(2));
 							tempR.setType(rs.getString(3));
+							tempR.setStatus(rs.getString(4));
 							alldata.add(tempR);
 						}
 						break;
@@ -586,11 +604,10 @@ public class DatabaseController {
 						{
 							tempRorders = new OrdersReports();
 							tempRorders.setReport_id(rs.getString(1));
-							tempRorders.setMachine_id(rs.getString(2));
-							tempRorders.setLocation(rs.getString(3));
-							tempRorders.setData(rs.getString(4));
-							tempRorders.setMonth(rs.getString(5));
-							tempRorders.setYear(rs.getString(6));
+							tempRorders.setLocation(rs.getString(2));
+							tempRorders.setData(rs.getString(3));
+							tempRorders.setMonth(rs.getString(4));
+							tempRorders.setYear(rs.getString(5));
 							alldata.add(tempRorders);
 						}
 						break;
@@ -638,7 +655,7 @@ public class DatabaseController {
 	   }
 	  
 	  public String[] ConnectToServer(String str , int flag) throws SQLException {
-			Statement stmt;
+		    Statement stmt;
 			String password = null;
 			String value;
 			String[] passRoleFnameSubNumFirstCart = new String[6];
@@ -654,7 +671,7 @@ public class DatabaseController {
 				stmt = conn.createStatement();
 				ResultSet rs = stmt.executeQuery("SELECT password,role,first_name,subscriber_number,is_new_subscriber,ID FROM users Where " +value +" = \""+ str +"\"");
 		 		if(!rs.next())
-		 			return new String[] {"","",""};
+		 			return new String[] {"-1","-1","-1","-1","-1","-1"};
 				passRoleFnameSubNumFirstCart[0] = rs.getString(1);
 		 		passRoleFnameSubNumFirstCart[1] = rs.getString(2);
 		 		passRoleFnameSubNumFirstCart[2] = rs.getString(3);
