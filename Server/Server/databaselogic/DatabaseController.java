@@ -331,6 +331,24 @@ public class DatabaseController {
 			} catch (SQLException e) { e.printStackTrace(); }
 			break;
 			
+			
+		case "updatestockrequest":
+			ps = conn.prepareStatement("UPDATE stockrequests "
+					+ " SET resolved_date = ? , status = ? "
+					+ " WHERE stock_request_id = ? ");
+			
+			try {
+				System.out.println(Date.valueOf(LocalDate.now()));
+				ps.setDate(1, Date.valueOf(LocalDate.now()));
+				ps.setString(2, "Resolved");
+				ps.setInt(3, Integer.parseInt(s[1]));
+				ps.executeUpdate();
+			} catch (SQLException e) {
+				e.printStackTrace(); 
+			}
+			break;
+			
+			
 		case "orders":
 			String[] numberAndStatusForOrder;
 			ps = conn.prepareStatement("UPDATE orders "

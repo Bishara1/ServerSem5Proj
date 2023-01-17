@@ -127,10 +127,6 @@ public class EchoServer extends AbstractServer {
   
   @Override
   protected void clientConnected(ConnectionToClient client) {
-//	  ArrayList<String> info = new ArrayList<>();
-//	  info.add(client.getInetAddress().toString());
-//	  System.out.println("Connected");
-	  updateCommandText("New client connected");
   }
   
   public static void updateCommandText(String message) {
@@ -172,9 +168,9 @@ public class EchoServer extends AbstractServer {
   
   
   /**
-   * @param data
-   * @param client
-   * @param ip
+   * Parse data came from client
+   * @param data  data message gotten from client
+   * @param client connected client
    * @throws IOException
    */
   public void ParseClientData(Message data, ConnectionToClient client) throws IOException {
@@ -329,6 +325,14 @@ public class EchoServer extends AbstractServer {
 				  client.sendToClient(response); //tableName,id,whatToUpdate
 				  break;
 				  
+			  case UpdateStockRequest:
+				  dbController.UpdateToDB(data);
+				  
+				  response.setCommand(Command.UpdateStockRequest);
+				  response.setContent(null);
+				  client.sendToClient(response);
+				  break;
+				  
 			  case UpdateMachineStock:
 				  dbController.UpdateToDB(data);
 				  response.setCommand(Command.UpdateMachineStock);
@@ -470,6 +474,8 @@ public class EchoServer extends AbstractServer {
 						   client.sendToClient(response);
 						   break;
 						   
+						   
+						   
 			    case InsertOrder:
 		    		response.setCommand(Command.InsertOrder);
 		    		int order = (int)dbController.SaveToDB(data);
@@ -523,6 +529,20 @@ public class EchoServer extends AbstractServer {
 			    	client.sendToClient(response);
 			    	break;
 			    	
+			    case ReadUserReports:
+			    	response.setCommand(Command.ReadUserReports);
+			    	GottenDatabase = dbController.ReadFromDB(data);
+			    	
+			    	ArrayList<UsersReports> uReports = new ArrayList<>();
+			    	for(Object obj : GottenDatabase)
+			    		uReports.add((UsersReports)obj);
+			    	
+			    	response.setContent(uReports);
+			    	client.sendToClient(response);
+			    	break;
+			    	
+			    	
+			    	
 			    case UpdateOrders:
 			    	response.setCommand(Command.UpdateOrders);
 			    	response.setContent(null);
@@ -530,7 +550,7 @@ public class EchoServer extends AbstractServer {
 			    	
 			    	client.sendToClient(response);
 			    	break;
-			    	
+			   			    	
 			    case UpdateDeliveries:
 			    	response.setCommand(Command.UpdateDeliveries);
 			    	response.setContent(null);

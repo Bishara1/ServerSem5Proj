@@ -1,5 +1,6 @@
 package server;
 
+import java.sql.Date;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -16,6 +17,10 @@ import logic.Order;
 import logic.OrdersReports;
 import logic.Subscriber;
 
+/**
+ * A class that defines how the report that creates and saves the reports each month function
+ *
+ */
 public class ReportsThread implements Runnable {
 	
 	ArrayList<Location> locations = new ArrayList<Location>();
@@ -25,21 +30,30 @@ public class ReportsThread implements Runnable {
 	private int month,year;
 	private ArrayList<String> newItems = new ArrayList<String>(); 
 	
+	/**
+	 * Constructor that gets an instance of dbController and saves it
+	 * 
+	 * @param db - Instance of dbController to use its functions
+	 */
 	public ReportsThread(DatabaseController db)
 	{
 		this.db = db;
 	}
 	
+	/**
+	 * Method that defines how the thread that uses this class runs
+	 * Checks todays date, if its the first day of the month then calls 3 report creation methods
+	 */
 	@Override
 	public void run() {
 			try {
-				//while(true) {
-					if(LocalDate.now().getDayOfMonth() == 1) //should be 1
+				while(true) {
+					if(LocalDate.now().getDayOfMonth() == 1) 
 					{
 						if(LocalDate.now().getMonthValue() == 1)
 						{
-							month = 12; //should be 12
-							year = LocalDate.now().getYear()-1; //should be -1
+							month = 12; 
+							year = LocalDate.now().getYear()-1; 
 						}
 						else
 						{
@@ -51,7 +65,7 @@ public class ReportsThread implements Runnable {
 						CreateUserReports(month,year);
 					}
 					Thread.sleep(86400000); 
-				//}
+				}
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -59,6 +73,13 @@ public class ReportsThread implements Runnable {
 		
 	}
 	
+	/**
+	 * Reads all locations from Database
+	 * For each location in database this method creates an order report and saves it in database
+	 * 
+	 * @param month - the month of the newly created order
+	 * @param year - the year of the newly created order
+	 */
 	public void CreateOrderReports(int month,int year)
 	{
 		try {
@@ -83,6 +104,17 @@ public class ReportsThread implements Runnable {
 		
 	}
 	
+	/**
+	 * Creates an order report based on month, year and location
+	 * Reads all orders
+	 * Checks each order from database
+	 * If order were currently checking matches the order criteria then it is added to the report using scanOrder()
+	 * At the end of the order checks insert order if there's at least 1 order that fits the criteria
+	 * 
+	 * @param location - location of which the report is based on
+	 * @param month - month of which the report is based on
+	 * @param year - year of which the report is based on
+	 */
 	public void createNewOrderReport(String location,String month,String year) {
 			
 			try {
@@ -126,6 +158,13 @@ public class ReportsThread implements Runnable {
 			}
 		}
 	
+	/**
+	 * Scans each item in report data to check if it already exists in order report using checkInReport()
+	 * If it does exist then this method will ignore it
+	 * Otherwise add it to report to be inserted to the database
+	 * 
+	 * @param data - report data
+	 */
 	public void scanOrder(String data) {
 		String[] temp = data.split("\\.");
 		
@@ -135,6 +174,13 @@ public class ReportsThread implements Runnable {
 		
 	}
 	
+	/**
+	 * Checks if a certain item already exists in report data using checkContains()
+	 * If it is then add the amount to the correct cell in the report data
+	 * Otherwise inserts item data into a new cell in the report data
+	 * 
+	 * @param data - item data
+	 */
 	public void checkInReport(String data) {
 		String[] nameAmount = data.split(",");
 		String[] old = null;
@@ -152,19 +198,34 @@ public class ReportsThread implements Runnable {
 		}
 	}
 	
-	public int checkContains(ArrayList<String> arr, String s)
+	/**
+	 * Scans the array given in the parameters to check if it contains a certain item name
+	 * If the array contains the item name then we return the item's index in the array
+	 * Otherwise it returns -1
+	 * 
+	 * @param arr - the array which we are scanning
+	 * @param name - the name of the item were looking for in the array
+	 * @return index of the item in the array, -1 otherwise
+	 */
+	public int checkContains(ArrayList<String> arr, String name)
 	{
 		int size = arr.size();
 		String[] split = null;
 		for(int i = 0;i<size;i++)
 		{
 			split = arr.get(i).split(",");
-			if(split[0].equals(s))
+			if(split[0].equals(name))
 				return i;
 		}
 		return -1;
 	}
 	
+	/**
+	 * Turns an array into a string
+	 * 
+	 * @param arr - the array which we are turning into a string
+	 * @return the array in the form a string
+	 */
 	public String fromArrayToString(ArrayList<String> arr)
 	{
 		int size = arr.size();
@@ -178,6 +239,15 @@ public class ReportsThread implements Runnable {
 		return str;
 	}
 	
+	/**
+	 * Creates an inventory report based on month, year and location
+	 * Reads all machines
+	 * Creates an inventory check for each machine using getOldItemsString() and getNewItemsString
+	 * Creates an inventory report based on results of 2 methods getOldItemsString() and getNewItemsString
+	 * 
+	 * @param month - month of which the report is based on
+	 * @param year - year of which the report is based on
+	 */
 	public void CreateInventoryReports(int month,int year)
 	{
 		try {
@@ -228,6 +298,12 @@ public class ReportsThread implements Runnable {
 		
 	}
 	
+	/**
+	 * Generates a string representing the current stock of the machine
+	 * 
+	 * @param machine - machine which were making the report on
+	 * @return string representing the current stock of the machine
+	 */
 	public String getNewItemsString(Machine machine)
 	{
 		ArrayList<String> items = machine.getItems();
@@ -244,6 +320,14 @@ public class ReportsThread implements Runnable {
 		return newItems;
 	}
 	
+	/**
+	 * Generates a string representing the stock of the machine at the start of the report's month
+	 * 
+	 * @param machineId - the ID of the machine which were making the report on
+	 * @param month - month of the current report were making
+	 * @param year - year of the current report were making
+	 * @return string representing the stock of the machine at the start of the report's month
+	 */
 	public String getOldItemsString(int machineId,String month,String year)
 	{
 		try {
@@ -267,6 +351,29 @@ public class ReportsThread implements Runnable {
 		
 	}
 	
+	
+	/*
+	 * Creates an order report based on month, year and location Reads all orders
+	 * Checks each order from database If order were currently checking matches the
+	 * order criteria then it is added to the report using scanOrder() At the end of
+	 * the order checks insert order if there's at least 1 order that fits the
+	 * criteria
+	 */
+	
+	/**
+	 * Creates a user report based on month, year
+	 * Reads all users
+	 * Reads all orders
+	 * Checks each order's date
+	 * If the date matches the criteria the order is added to a local array
+	 * Otherwise it is ignore'
+	 * Calls findUserOrdersCount with parameters userID and the local array of order 
+	 * Counts each user's amount of orders in the month and year specified and adds it to the report data
+	 * Inserts the report into the Database
+	 * 
+	  @param month - month of which the report is based on
+	 * @param year - year of which the report is based on
+	 */
 	public void CreateUserReports(int month,int year)
 	{
 		try {
@@ -296,7 +403,8 @@ public class ReportsThread implements Runnable {
 			objects = db.ReadFromDB(messageToServer); 
 			for(Object obj : objects)
 			{
-				if(((Order)obj).getOrder_created().getMonth() == month && ((Order)obj).getOrder_created().getYear() == year)
+				String[] monthYear = getMonthYear(((Order)obj).getOrder_created());
+				if(monthYear[0].equals(monthStr) && monthYear[1].equals(yearStr))
 					orders.add((Order)obj);
 				//test if order is in the month thats specified
 			}
@@ -330,6 +438,13 @@ public class ReportsThread implements Runnable {
 		}catch(SQLException e) { e.printStackTrace();}
 	}
 	
+	/**
+	 * Counts all orders that a customer has had in the month and year specified in the report
+	 * 
+	 * @param id - ID of a customer
+	 * @param orders - an ArrayList of orders 
+	 * @return the amount of orders under the ID of the customer 
+	 */
 	public int findUserOrdersCount(int id,ArrayList<Order> orders) {
 		int cnt = 0;
 		
@@ -338,6 +453,21 @@ public class ReportsThread implements Runnable {
 				cnt++;
 		}
 		return cnt;
+	}
+	
+	/**
+	 * Turns a date into an array of string which holds the month and year value in string form
+	 * 
+	 * @param date - the date to split
+	 * @return a string array holding the month value in the first cell and the year value in the second cell
+	 */
+	public String[] getMonthYear(Date date)
+	{
+		String[] monthYear = new String[2];
+		String[] temp = date.toString().split("-");
+		monthYear[1] = temp[0];
+		monthYear[0] = temp[1];
+		return monthYear;
 	}
 
 	
