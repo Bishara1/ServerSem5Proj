@@ -18,6 +18,8 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import logic.Connected;
 import server.EchoServer;
@@ -36,6 +38,8 @@ public class ServerInfoController implements Initializable {
 	private Button startServerbtn;
 	@FXML
 	private Button importUsersBtn;
+	@FXML
+	private ImageView image;
 	
 	@FXML
 	public TextArea screen;
@@ -56,21 +60,35 @@ public class ServerInfoController implements Initializable {
 	private ObservableList<Connected> data;
 	
    
+	/**
+	 * Starts window
+	 * @param primaryStage
+	 * @throws Exception
+	 */
 	public void start(Stage primaryStage) throws Exception {
 		// get port and initialize port text field
 		String port = Integer.toString(EchoServer.DEFAULT_PORT);
-		
 		//FXMLLoader loader = new FXMLLoader();
 		Parent root = FXMLLoader.load(getClass().getResource("/gui_server/ServerInfo.fxml"));
-	
 		Scene scene = new Scene(root);
+		
+		scene.getStylesheets().add(getClass().getResource("/css/everything.css").toExternalForm());
 		primaryStage.setTitle("Server Info");
 		primaryStage.setScene(scene);
 		primaryStage.show();
 	}
 	
+	/**
+	 * Initialize window components before window starts
+	 */
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		String actual = "/images/ekrut.png" ;
+		String path = this.getClass().getResource(actual).toExternalForm();
+		Image img = new Image(path,true);
+		
+		image.setImage(img);
+		
 		new Thread() {
 	        public void run() {
 	        	while (true) {
@@ -96,6 +114,9 @@ public class ServerInfoController implements Initializable {
 	}
 	
 	
+	/**
+	 * Run server when pressing run server button
+	 */
 	public void RunServerBtn() {
 		// on click, change button color to #373057
 		if (serverPortxt.getText().equals("")) {
@@ -109,6 +130,9 @@ public class ServerInfoController implements Initializable {
 		ranServerAlready = true;	
 	}
 	
+	/**
+	 * Refresh cpnnected clients 
+	 */
 	public void RefreshClientsBtn() {
 		table.getItems().clear();
 		LoadTable();
@@ -123,6 +147,10 @@ public class ServerInfoController implements Initializable {
 //		startServerbtn.setDisable(condition);
 //	}
 	
+	
+	/**
+	 * Initialize and load table
+	 */
 	public void LoadTable() {
 		colIp.setCellValueFactory(new PropertyValueFactory<>("Ip"));
 		colHost.setCellValueFactory(new PropertyValueFactory<>("Host"));
@@ -130,6 +158,9 @@ public class ServerInfoController implements Initializable {
 		colUserID.setCellValueFactory(new PropertyValueFactory<>("connectedUserID"));
 	}
 	
+	/**
+	 * Import external users to database to ekrut database
+	 */
 	public void ImportUsersBtn() {
 		if (!ranServerAlready) {
 //			System.out.println("Haven't ran server yet!");
@@ -149,6 +180,9 @@ public class ServerInfoController implements Initializable {
 //			
 //	}
 	
+	/**
+	 * Quit server
+	 */
 	public void QuitBtn() {
 		System.exit(0);
 	}

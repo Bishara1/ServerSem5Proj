@@ -9,7 +9,6 @@
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.effect.Blend?>
-<?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
@@ -28,12 +27,12 @@
          </font>
       </Label>
       <TextField fx:id="serverIptxt" editable="false" layoutX="289.0" layoutY="174.0" prefHeight="31.0" prefWidth="161.0" />
-      <Button fx:id="startServerbtn" layoutX="219.0" layoutY="328.0" mnemonicParsing="false" onAction="#RunServerBtn" prefHeight="45.0" prefWidth="225.0" stylesheets="@../../../../CommonSem5Proj/Common/Common/css/buttons.css" text="Start Server" textFill="WHITE">
+      <Button fx:id="startServerbtn" layoutX="219.0" layoutY="328.0" mnemonicParsing="false" onAction="#RunServerBtn" prefHeight="45.0" prefWidth="225.0" text="Start Server" textFill="WHITE">
          <font>
             <Font size="21.0" />
          </font>
       </Button>
-      <TableView fx:id="table" editable="true" layoutX="489.0" layoutY="147.0" prefHeight="153.0" prefWidth="420.0" stylesheets="@../../../../CommonSem5Proj/Common/Common/css/table.css">
+      <TableView fx:id="table" editable="true" layoutX="489.0" layoutY="147.0" prefHeight="153.0" prefWidth="420.0">
          <columns>
             <TableColumn fx:id="colIp" prefWidth="120.0" text="IP" />
             <TableColumn fx:id="colUserID" prefWidth="115.0" text="USER ID" />
@@ -54,7 +53,7 @@
             <Font name="System Bold Italic" size="23.0" />
          </font>
       </Label>
-      <Button layoutX="219.0" layoutY="512.0" mnemonicParsing="false" onAction="#QuitBtn" prefHeight="45.0" prefWidth="225.0" stylesheets="@../../../../CommonSem5Proj/Common/Common/css/exit-buttons.css" text="Quit" textFill="WHITE">
+      <Button id="backBtn" layoutX="219.0" layoutY="512.0" mnemonicParsing="false" onAction="#QuitBtn" prefHeight="45.0" prefWidth="225.0" text="Quit" textFill="WHITE">
          <font>
             <Font size="21.0" />
          </font>
@@ -65,7 +64,7 @@
          </font>
       </Label>
       <TextField fx:id="serverPortxt" layoutX="289.0" layoutY="222.0" prefHeight="31.0" prefWidth="161.0" />
-      <Button layoutX="219.0" layoutY="390.0" mnemonicParsing="false" onAction="#RefreshClientsBtn" prefHeight="45.0" prefWidth="225.0" stylesheets="@../../../../CommonSem5Proj/Common/Common/css/buttons.css" text="Refresh Clients" textFill="WHITE">
+      <Button layoutX="219.0" layoutY="390.0" mnemonicParsing="false" onAction="#RefreshClientsBtn" prefHeight="45.0" prefWidth="225.0" text="Refresh Clients" textFill="WHITE">
          <font>
             <Font size="21.0" />
          </font>
@@ -77,7 +76,7 @@
       </Label>
       <PasswordField fx:id="databasePasswordtxt" layoutX="289.0" layoutY="268.0" prefHeight="31.0" prefWidth="161.0" />
       <TextArea fx:id="screen" editable="false" layoutX="490.0" layoutY="343.0" prefHeight="223.0" prefWidth="420.0" promptText="Waiting for connection ..." style="-fx-font-size: 15px;" />
-      <Button fx:id="importUsersBtn" layoutX="219.0" layoutY="448.0" mnemonicParsing="false" onAction="#ImportUsersBtn" prefHeight="45.0" prefWidth="225.0" stylesheets="@../../../../CommonSem5Proj/Common/Common/css/buttons.css" text="Import Data" textFill="WHITE">
+      <Button fx:id="importUsersBtn" layoutX="219.0" layoutY="448.0" mnemonicParsing="false" onAction="#ImportUsersBtn" prefHeight="45.0" prefWidth="225.0" text="Import Data" textFill="WHITE">
          <font>
             <Font size="21.0" />
          </font>
@@ -92,11 +91,7 @@
             <Insets />
          </opaqueInsets>
          <children>
-            <ImageView fitHeight="200.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
-               <image>
-                  <Image url="@../../../../CommonSem5Proj/Common/Common/images/ekrut.png" />
-               </image>
-            </ImageView>
+            <ImageView fx:id="image" fitHeight="200.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" />
          </children>
       </VBox>
    </children>
