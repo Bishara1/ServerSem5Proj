@@ -56,7 +56,7 @@ public class StockRequest implements Serializable{
 
 	/**
 	 * Sets stock request id
-	 * @param stock_request_id
+	 * @param stock_request_id stoc request id
 	 */
 	public void setStock_request_id(int stock_request_id) {
 		this.stock_request_id = stock_request_id;
@@ -71,7 +71,7 @@ public class StockRequest implements Serializable{
 
 	/**
 	 * Sets machine id
-	 * @param machine_id
+	 * @param machine_id machine_id
 	 */
 	public void setMachine_id(int machine_id) {
 		this.machine_id = machine_id;

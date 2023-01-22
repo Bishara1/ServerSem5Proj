@@ -282,12 +282,7 @@ public class ReportsThread implements Runnable {
 			}
 			for(Machine machine : machines)
 			{
-				oldData = getOldItemsString(machine.getMachine_id(),monthBeforeStr,yearBeforeStr);
-				newData = getNewItemsString(machine);
-				orderToServer.setCommand(Command.InsertInventoryReport);
-				ArrayList<String> newReport = new ArrayList<String>(Arrays.asList(String.valueOf(machine.getMachine_id()),machine.getLocation(),oldData,newData,monthStr,yearStr));
-				orderToServer.setContent(newReport);
-				db.SaveToDB(orderToServer);			
+				insertNewInventoryReport(machine,monthBeforeStr,yearBeforeStr,monthStr,yearStr);
 			}
 			
 			
@@ -296,6 +291,28 @@ public class ReportsThread implements Runnable {
 			
 		}catch(Exception e) { e.printStackTrace();}
 		
+	}
+	
+	public Object insertNewInventoryReport(Machine machine,String monthBeforeStr,String yearBeforeStr,String monthStr,String yearStr)
+	{
+		try {
+			int month = Integer.parseInt(monthStr);
+			int year = Integer.parseInt(yearStr);
+			if(month < 0 || month > 12 || year < 2022) {
+				return null;
+			}
+			Message orderToServer = new Message(null,null);
+			System.out.println();
+			String oldData = getOldItemsString(machine.getMachine_id(),monthBeforeStr,yearBeforeStr);
+			String newData = getNewItemsString(machine);
+			orderToServer.setCommand(Command.InsertInventoryReport);
+			ArrayList<String> newReport = new ArrayList<String>(Arrays.asList(String.valueOf(machine.getMachine_id()),machine.getLocation(),oldData,newData,monthStr,yearStr));
+			orderToServer.setContent(newReport);
+			Object result = db.SaveToDB(orderToServer);
+			return result;
+		}catch(Exception e) {
+			return null;
+		}
 	}
 	
 	/**

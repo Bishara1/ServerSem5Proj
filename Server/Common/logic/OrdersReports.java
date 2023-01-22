@@ -73,7 +73,7 @@ public class OrdersReports implements Serializable
 	
 	/**
 	 * Sets report id
-	 * @param report_id
+	 * @param report_id report id
 	 */
 	public void setReport_id(String report_id) {
 		this.report_id = report_id;
@@ -89,7 +89,7 @@ public class OrdersReports implements Serializable
 	
 	/**
 	 * Sets machine id
-	 * @param machine_id
+	 * @param machine_id machine id
 	 */
 	public void setMachine_id(String machine_id) {
 		this.machine_id = machine_id;

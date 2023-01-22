@@ -41,6 +41,7 @@ import common.Message;
  * @version July 2000
  */
 public class EchoServer extends AbstractServer { 
+	public String[] userInfo;
 	private DatabaseController dbController;
 	//private ArrayList<> ******************************************************
 	public static ArrayList<Connected> users = new ArrayList<Connected>();
@@ -102,8 +103,18 @@ public class EchoServer extends AbstractServer {
 	  return ip;
   }
 
-    
-  /**
+
+
+public void setDbController(DatabaseController dbController) {
+	this.dbController = dbController;
+}
+
+public static void setConnectedToDatabase(boolean isConnectedToDatabase) {
+	EchoServer.isConnectedToDatabase = isConnectedToDatabase;
+}
+
+
+/**
    * This method overrides the one in the superclass.  Called
    * when the server starts listening for connections.
    */
@@ -111,9 +122,9 @@ public class EchoServer extends AbstractServer {
 	  dbController = DatabaseController.GetFunctionsInstance(databasePassword);
 	  if (dbController.IsConnectedToDB())
 		  isConnectedToDatabase = true;
-	  updateCommandText("Server listening for connections on port " + getPort());
-	  reportThread = new Thread(new ReportsThread(dbController));
-	  reportThread.start();
+	  //updateCommandText("Server listening for connections on port " + getPort());
+	  //reportThread = new Thread(new ReportsThread(dbController));
+	  //reportThread.start();
   }
   
   /**
@@ -171,8 +182,8 @@ public class EchoServer extends AbstractServer {
    * Parse data came from client
    * @param data  data message gotten from client
    * @param client connected client
-   * @throws IOException
-   */
+   * @throws IOException exception
+   */ 
   public void ParseClientData(Message data, ConnectionToClient client) throws IOException {
 	  Message response = new Message(null, null);
 	  ArrayList<Object> GottenDatabase;
@@ -183,101 +194,17 @@ public class EchoServer extends AbstractServer {
 		  
 			  case Connect:
 				  response.setCommand(Command.Connect);
-				  boolean found = false;
-				  boolean connected = false;
-				  int userID;
-				  String[] usernamePassword = (String[])data.getContent();
-				  String[] passRoleFname = dbController.ConnectToServer(usernamePassword[0], 1);
-				  
-				  if (!usernamePassword[1].equals(passRoleFname[0])) {
-					  String[] nulls = new String[] {"-1", "-1", "-1", "-1", "-1", "-1"};
-					  response.setContent(nulls);
-					  client.sendToClient(response);
-					  break;
-				  }
-				  
-				  //Check if user is already connected
-				  //Then check add IP AND user
-				  for (Connected Client : users) {
-					  if (Client.getConnectedUserID() == Integer.parseInt(passRoleFname[5]) && Client.getStatus().equals("Connected")) {
-						  connected = true;
-						  break;
-					  }
-			  	  }
-				  
-				  if(connected == true)
-				  {
-					  passRoleFname[0] = "User already connected";
-					  response.setContent(passRoleFname);
-					  response.setCommand(Command.Connect);
-					  client.sendToClient(response);
-				  	  break;
-				  }
-				  
-				  for (Connected Client : users) {
-					  if (Client.getConnectedUserID() == Integer.parseInt(passRoleFname[5]) && Client.getStatus().equals("Disconnected")) {
-						  users.get(users.indexOf(Client)).setStatus("Connected");
-						  found = true;
-						  break;
-					  }
-			  	  }
-				  
-				  if(found == false)
-				  {
-					  userID = Integer.parseInt(passRoleFname[5]);
-					  String[] ip = client.toString().split(" ");
-					  
-					  users.add(new Connected(ip[0],String.valueOf(this.getPort()),"Connected", userID));
-				  }
-				 
-				  
-				  response.setContent(passRoleFname);
-				  response.setCommand(Command.Connect);
-				  client.sendToClient(response);
-			  	  break;
+				  String[] details = getConnectDetails(data,client.toString());
+				  response.setContent(details);
+				  client.sendToClient(details);
+				  break;
 				  
 			  case EKTConnect:
-				  int userIdEKT;
-				  boolean found1 = false;
-				  boolean connected1 = false;
-				  String id= (String)data.getContent();
-				  String[] passRoleFnameID = dbController.ConnectToServer(id ,0);
-				  
-				  for (Connected Client : users) {
-					  if (Client.getConnectedUserID() == Integer.parseInt(passRoleFnameID[5]) && Client.getStatus().equals("Connected")) {
-						  connected1 = true;
-						  break;
-					  }
-			  	  }
-				  
-				  for (Connected Client : users) {
-					  if (Client.getConnectedUserID() == Integer.parseInt(passRoleFnameID[5]) && Client.getStatus().equals("Disconnected")) {
-						  users.get(users.indexOf(Client)).setStatus("Connected");
-						  found1 = true;
-						  break;
-					  }
-			  	  }
-				  
-				  if(connected1 == true)
-				  {
-					  passRoleFnameID[0] = "User already connected";
-					  response.setContent(passRoleFnameID);
-					  response.setCommand(Command.Connect);
-					  client.sendToClient(response);
-				  	  break;
-				  }
-				  
-				  if(found1 == false)
-				  {
-					  userID = Integer.parseInt(passRoleFnameID[5]);
-					  String[] ip1 = client.toString().split(" ");
-					  users.add(new Connected(ip1[0],String.valueOf(this.getPort()),"Connected", userID));
-				  }
-				  
-				  response.setContent(passRoleFnameID);
 				  response.setCommand(Command.Connect);
-				  client.sendToClient(response);
-			  	  break;
+				  String[] detailsID = getEKTConnectDetails(data,client.toString());
+				  response.setContent(detailsID);
+				  client.sendToClient(detailsID);
+				  break;
 	
 			  case InsertUser:
 				  Message m = new Message(null, null);
@@ -561,12 +488,7 @@ public class EchoServer extends AbstractServer {
 			    	
 			    case ReadInventoryReports:
 			    	response.setCommand(Command.ReadInventoryReports);
-			    	GottenDatabase = dbController.ReadFromDB(data);
-			    	
-			    	ArrayList<InventoryReports> inventory = new ArrayList<>();
-			    	for (Object obj : GottenDatabase)
-			    		inventory.add((InventoryReports)obj);
-					
+			    	ArrayList<InventoryReports> inventory = GetInventoryReport(data);
 			    	response.setContent(inventory);
 			    	client.sendToClient(response);
 			    	break;
@@ -627,5 +549,122 @@ public class EchoServer extends AbstractServer {
 		 }  
 	  } catch(SQLException e) {e.printStackTrace();}
   }
+  
+  //Case connect new refactored method
+  
+  public String[] getConnectDetails(Message data, String client)
+  {
+	  boolean found = false;
+	  boolean connected = false;
+	  int userID;
+	  String[] usernamePassword = (String[])data.getContent();
+	  String[] passRoleFname = null;
+	try {
+		passRoleFname = dbController.ConnectToServer(usernamePassword[0], 1);
+	} catch (SQLException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+	  
+	  if (!usernamePassword[1].equals(passRoleFname[0])) { //Password doesnt match
+		  String[] nulls = new String[] {"-1", "-1", "-1", "-1", "-1", "-1"};
+		  return nulls;
+	  }
+	  
+	  //Check if user is already connected
+	  //Then check add IP AND user
+	  for (Connected Client : users) {
+		  if (Client.getConnectedUserID() == Integer.parseInt(passRoleFname[5]) && Client.getStatus().equals("Connected")) {
+			  connected = true;
+			  break;
+		  }
+  	  }
+	  
+	  if(connected == true)
+	  {
+		  passRoleFname[0] = "User already connected"; //user already connected
+	  	  return passRoleFname;
+	  }
+	  
+	  for (Connected Client : users) {
+		  if (Client.getConnectedUserID() == Integer.parseInt(passRoleFname[5]) && Client.getStatus().equals("Disconnected")) {
+			  users.get(users.indexOf(Client)).setStatus("Connected"); //Returning login
+			  found = true;
+			  break;
+		  }
+  	  }
+	  
+	  if(found == false)
+	  {
+		  userID = Integer.parseInt(passRoleFname[5]); //New login
+		  String[] ip = client.split(" ");
+		  
+		  users.add(new Connected(ip[0],String.valueOf(this.getPort()),"Connected", userID));
+	  }
+	  
+	  return passRoleFname;
+  }
+  
+  public String[] getEKTConnectDetails(Message data, String client)
+  {
+	  boolean found1 = false;
+	  boolean connected1 = false;
+	  String id= (String)data.getContent();
+	  String[] passRoleFnameID = null;
+	try {
+		passRoleFnameID = dbController.ConnectToServer(id ,0);
+	} catch (SQLException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+	  
+	  for (Connected Client : users) {
+		  if (Client.getConnectedUserID() == Integer.parseInt(passRoleFnameID[5]) && Client.getStatus().equals("Connected")) {
+			  connected1 = true;
+			  break;
+		  }
+  	  }
+	  
+	  for (Connected Client : users) {
+		  if (Client.getConnectedUserID() == Integer.parseInt(passRoleFnameID[5]) && Client.getStatus().equals("Disconnected")) {
+			  users.get(users.indexOf(Client)).setStatus("Connected");
+			  found1 = true;
+			  break;
+		  }
+  	  }
+	  
+	  if(connected1 == true)
+	  {
+		  passRoleFnameID[0] = "User already connected";
+		  return passRoleFnameID;
+	  }
+	  
+	  if(found1 == false)
+	  {
+		  int userID = Integer.parseInt(passRoleFnameID[5]);
+		  String[] ip1 = client.split(" ");
+		  users.add(new Connected(ip1[0],String.valueOf(this.getPort()),"Connected", userID));
+	  }
+	  
+	  return passRoleFnameID;
+  }
+  
+  public ArrayList<InventoryReports> GetInventoryReport(Message data)	
+  {
+	  
+	  ArrayList<Object> GottenDatabase = new ArrayList<>();
+	try {
+		GottenDatabase = dbController.ReadFromDB(data);
+	} catch (SQLException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+  	  ArrayList<InventoryReports> inventory = new ArrayList<>();
+  	  for (Object obj : GottenDatabase)
+  		  inventory.add((InventoryReports)obj);
+  	  return inventory;
+		
+  }
+  
 }
 //End of EchoServer class

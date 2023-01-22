@@ -68,6 +68,16 @@ public class Machine implements Serializable {
 		this.location = location;
 		this.allItems = allItems;
 		this.amount_per_item = amount_per_item;
+		ArrayList<String> items = new ArrayList<String>();
+		ArrayList<Integer> amounts = new ArrayList<Integer>();
+		String[] nameArr = allItems.split(",");
+		String[] amountArr = amount_per_item.split(",");
+		for(String str : nameArr)
+			items.add(str);
+		for(String str : amountArr)
+			amounts.add(Integer.parseInt(str));
+		this.items = items;
+		this.amount = amounts;
 	}
 
 	/**
@@ -79,7 +89,7 @@ public class Machine implements Serializable {
 
 	/**
 	 * Sets machine id
-	 * @param machine_id
+	 * @param machine_id machine id
 	 */
 	public void setMachine_id(int machine_id) {
 		this.machine_id = machine_id;
@@ -151,8 +161,8 @@ public class Machine implements Serializable {
 	}
 	
 	/**
-	 * @param index
-	 * @returns the item according to  the index
+	 * @param index index
+	 * @return the item according to  the index
 	 */
 	public String getItem(int index) {
 		return this.items.get(index);
@@ -160,8 +170,8 @@ public class Machine implements Serializable {
 	}
 	
 	/**
-	 * @param name
-	 * @returns true if the item is existed
+	 * @param name name
+	 * @return true if the item is existed
 	 */
 	public boolean existItem(String name) {
 		for(String item : items)
@@ -174,7 +184,7 @@ public class Machine implements Serializable {
 	}
 	
 	/**
-	 * @returns ArrayList of items
+	 * @return ArrayList of items
 	 */
 	public ArrayList<String> getItems()
 	{
@@ -202,7 +212,7 @@ public class Machine implements Serializable {
 	
 	
 	/**
-	 * @returns ArrayList of items amount
+	 * @return ArrayList of items amount
 	 */
 	public ArrayList<Integer> getAmountItems()
 	{
@@ -210,8 +220,8 @@ public class Machine implements Serializable {
 	}
 	
 	/**
-	 * @param index
-	 * @returns the amount according to the index
+	 * @param index index
+	 * @return the amount according to the index
 	 */
 	public int getAmount(int index)
 	{

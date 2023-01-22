@@ -59,15 +59,15 @@ public class Delivery implements Serializable {
 	
 	/**
 	 * constructor that gets the information of delivery and sets all attribute to new values
-	 * @param delivery_id 
-	 * @param order_id
-	 * @param customer_id
-	 * @param shipping_date
-	 * @param estimated_delivery
-	 * @param status
-	 * @param total_price
-	 * @param location
-	 * @param address
+	 * @param delivery_id delivery id
+	 * @param order_id order id
+	 * @param customer_id customer id
+	 * @param shipping_date shipping date
+	 * @param estimated_delivery estimated delivery
+	 * @param status status 
+	 * @param total_price total price 
+	 * @param location location
+	 * @param address address
 	 */
 	public Delivery(int delivery_id, int order_id, int customer_id, Date shipping_date, Date estimated_delivery, String status, int total_price, String location, String address) {
 		this.delivery_id = delivery_id;
@@ -97,7 +97,7 @@ public class Delivery implements Serializable {
 
 	/**
 	 * Sets address
-	 * @param address
+	 * @param address address
 	 */
 	public void setAddress(String address) {
 		this.address = address;
@@ -105,7 +105,7 @@ public class Delivery implements Serializable {
 
 	/**
 	 * Sets delivery id 
-	 * @param delivery_id
+	 * @param delivery_id deliver id
 	 */
 	public void setDelivery_id(int delivery_id) {
 		this.delivery_id = delivery_id;
@@ -119,7 +119,7 @@ public class Delivery implements Serializable {
 	}
 
 	/**
-	 * @param order_id
+	 * @param order_id order id
 	 */
 	public void setOrder_id(int order_id) {
 		this.order_id = order_id;
@@ -133,7 +133,7 @@ public class Delivery implements Serializable {
 	}
 
 	/**Sets customer id
-	 * @param customer_id
+	 * @param customer_id customer id
 	 */
 	public void setCustomer_id(int customer_id) {
 		this.customer_id = customer_id;
@@ -147,7 +147,7 @@ public class Delivery implements Serializable {
 	}
 
 	/**Sets total price
-	 * @param total_price
+	 * @param total_price total price
 	 */
 	public void setTotal_price(int total_price) {
 		this.total_price = total_price;
@@ -161,7 +161,7 @@ public class Delivery implements Serializable {
 	}
 
 	/**Sets shipping date
-	 * @param shipping_date
+	 * @param shipping_date shipping date
 	 */
 	public void setShipping_date(Date shipping_date) {
 		this.shipping_date = shipping_date;
@@ -177,7 +177,7 @@ public class Delivery implements Serializable {
 	
 	/**
 	 * Sets estimated delivery date
-	 * @param estimated_dleivery
+	 * @param estimated_dleivery estimated delivery
 	 */
 	public void setEstimated_Delivery(Date estimated_dleivery) {
 		this.estimated_delivery = estimated_dleivery;
@@ -193,7 +193,7 @@ public class Delivery implements Serializable {
 
 	/**
 	 * Sets status
-	 * @param status
+	 * @param status status
 	 */
 	public void setStatus(String status) {
 		this.status = status;
@@ -208,7 +208,7 @@ public class Delivery implements Serializable {
 
 	/**
 	 * Sets location
-	 * @param location
+	 * @param location loaction
 	 */
 	public void setLocation(String location) {
 		this.location = location;

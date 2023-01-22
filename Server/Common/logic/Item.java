@@ -49,7 +49,7 @@ public class Item implements Serializable{
 
 	/**
 	 * Sets product id
-	 * @param productID
+	 * @param productID product id
 	 */
 	public void setProductID(String productID) {
 		this.productID = productID;

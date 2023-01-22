@@ -262,8 +262,9 @@ public enum Command {
 		}
 	};
 	
+	
 	/**
-	 * @returns a query based on the command type
+	 * @return  a query based on the command type
 	 */
 	public String GetQuery() {
 		switch(this) {
@@ -318,7 +319,7 @@ public enum Command {
 	}
 	
 	/**
-	 * @returns a primary key based on the command type
+	 * @return a primary key based on the command type
 	 */
 	public String GetID() {
 		switch(this) {
@@ -353,7 +354,7 @@ public enum Command {
 				return "report_id";
 				
 			case InsertInventoryReport:
-				return "machine_id";
+				return "report_id";
 				
 			case InsertUsersReport:
 				return "report_id";

@@ -70,7 +70,7 @@ public class Request implements Serializable {
 
 	/**
 	 * Sets request id
-	 * @param request_id
+	 * @param request_id request
 	 */
 	public void setRequest_id(int request_id) {
 		this.request_id = request_id;
@@ -85,7 +85,7 @@ public class Request implements Serializable {
 
 	/**
 	 * Sets customer id
-	 * @param customer_id
+	 * @param customer_id customer id
 	 */
 	public void setCustomer_id(int customer_id) {
 		this.customer_id = customer_id;

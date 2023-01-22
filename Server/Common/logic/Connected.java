@@ -100,7 +100,7 @@ public class Connected implements Serializable {
 
 	/**
 	 * Sets status - user status
-	 * @param status
+	 * @param status status
 	 */
 	public void setStatus(String status) {
 		Status = status;

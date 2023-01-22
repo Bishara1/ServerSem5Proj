@@ -41,7 +41,7 @@ public class Location implements Serializable {
 
 	/**
 	 * Sets location
-	 * @param location
+	 * @param location location
 	 */
 	public void setLocation(String location) {
 		this.location = location;

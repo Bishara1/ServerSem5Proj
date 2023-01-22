@@ -62,8 +62,8 @@ public class ServerInfoController implements Initializable {
    
 	/**
 	 * Starts window
-	 * @param primaryStage
-	 * @throws Exception
+	 * @param primaryStage primary stage
+	 * @throws Exception exception
 	 */
 	public void start(Stage primaryStage) throws Exception {
 		// get port and initialize port text field

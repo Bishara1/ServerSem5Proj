@@ -26,7 +26,7 @@ import logic.*;
 import server.EchoServer;
 
 //This Class is built using Singleton design pattern
-public class DatabaseController {
+public class DatabaseController implements DBInterface{
 	  private Connection conn;
 	  private boolean isConnectedToDB = false;
 	  private static DatabaseController DBFunctionsInstance = null;  // only one instance (singleton)
@@ -212,16 +212,17 @@ public class DatabaseController {
 						+ " VALUES ( ?, ?, ?, ?, ?, ?, ?)");
 		  		try 
 		  		{
-		  			ps.setString(1, String.valueOf(getLastId("inventoryreport", Command.InsertInventoryReport)));
-		  			ps.setString(2, data.get(0));
-		  			ps.setString(3, data.get(1));
-		  			ps.setString(4, data.get(2));
-		  			ps.setString(5, data.get(3));
-		  			ps.setString(6, data.get(4));
-		  			ps.setString(7, data.get(5));
+		  			ArrayList<String> addToDB = createInventoryReportDBData(msg);
+		  			ps.setString(1, addToDB.get(0));
+		  			ps.setString(2, addToDB.get(1));
+		  			ps.setString(3, addToDB.get(2));
+		  			ps.setString(4, addToDB.get(3));
+		  			ps.setString(5, addToDB.get(4));
+		  			ps.setString(6, addToDB.get(5));
+		  			ps.setString(7, addToDB.get(6));
 		  			
 		  			ps.executeUpdate();
-		  			
+		  			return addToDB;
 		  		} catch (Exception e) {	e.printStackTrace();}
 		  		break;
 		  		
@@ -722,6 +723,23 @@ public class DatabaseController {
 	   
 	   public static synchronized DatabaseController GetFunctionsInstance() {
 		   return ( DBFunctionsInstance == null ) ? new DatabaseController() : DBFunctionsInstance;
+	   }
+	   
+	   
+	   public ArrayList<String> createInventoryReportDBData(Message msg)
+	   {
+		   ArrayList<String> oldData = (ArrayList<String>)msg.getContent();
+		   ArrayList<String> newData = new ArrayList<>();
+		   try {
+			newData.add((String.valueOf(getLastId("inventoryreport", Command.InsertInventoryReport))));
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		   for(String str : oldData)
+			   newData.add(str);
+		   return newData;
+		   
 	   }
 	   
 	   public int getLastId(String tableName, Command cmd) throws SQLException

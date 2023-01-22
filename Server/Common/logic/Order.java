@@ -134,7 +134,7 @@ public class Order implements Serializable {
 
 	/**
 	 * Sets customer id
-	 * @param customer_id
+	 * @param customer_id customer id
 	 */
 	public void setCustomer_id(int customer_id) {
 		this.customer_id = customer_id;
@@ -164,7 +164,7 @@ public class Order implements Serializable {
 
 	/**
 	 * Sets order status
-	 * @param order_status
+	 * @param order_status order status
 	 */
 	public void setOrder_status(String order_status) {
 		this.order_status = order_status;
@@ -194,7 +194,7 @@ public class Order implements Serializable {
 
 	/**
 	 * Sets items in order
-	 * @param items_in_order
+	 * @param items_in_order items in order
 	 */
 	public void setItems_in_order(String items_in_order) {
 		this.items_in_order = items_in_order;

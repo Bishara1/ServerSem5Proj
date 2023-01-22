@@ -103,7 +103,7 @@ public class Subscriber implements Serializable {
 	
 	/**
 	 * Sets user id
-	 * @param id
+	 * @param id id
 	 */
 	public void setId(int id) {
 		this.id = id;
@@ -118,7 +118,7 @@ public class Subscriber implements Serializable {
 	
 	/**
 	 * Sets user first name
-	 * @param fname
+	 * @param fname fname
 	 * 
 	 */
 	public void setFname(String fname) {
@@ -134,7 +134,7 @@ public class Subscriber implements Serializable {
 	
 	/**
 	 * Sets user last name
-	 * @param lName
+	 * @param lName lname
 	 */
 	public void setLName(String lName) {
 		LName = lName;
@@ -149,7 +149,7 @@ public class Subscriber implements Serializable {
 	
 	/**
 	 * Sets user phone number
-	 * @param phoneNum
+	 * @param phoneNum phone number
 	 */
 	public void setPhoneNum(String phoneNum) {
 		PhoneNum = phoneNum;
@@ -164,7 +164,7 @@ public class Subscriber implements Serializable {
 	
 	/**
 	 * Sets user email
-	 * @param email
+	 * @param email email
 	 */
 	public void setEmail(String email) {
 		Email = email;
@@ -179,7 +179,7 @@ public class Subscriber implements Serializable {
 	
 	/**
 	 * Sets user credit card
-	 * @param visa
+	 * @param visa visa
 	 */
 	public void setVisa(String visa) {
 		Visa = visa;
@@ -194,7 +194,7 @@ public class Subscriber implements Serializable {
 	
 	/**
 	 * Sets subscriber number
-	 * @param subNum
+	 * @param subNum  subscriber number
 	 */
 	public void setSubNum(int subNum) {
 		SubNum = subNum;
@@ -209,7 +209,7 @@ public class Subscriber implements Serializable {
 
 	/**
 	 * Sets user name
-	 * @param userName
+	 * @param userName username
 	 */
 	public void setUserName(String userName) {
 		UserName = userName;
@@ -224,7 +224,7 @@ public class Subscriber implements Serializable {
 
 	/**
 	 * Sets user password
-	 * @param password
+	 * @param password password
 	 */
 	public void setPassword(String password) {
 		Password = password;
@@ -239,7 +239,7 @@ public class Subscriber implements Serializable {
 
 	/**
 	 * Sets user role
-	 * @param role
+	 * @param role role
 	 */
 	public void setRole(String role) {
 		Role = role;

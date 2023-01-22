@@ -9,8 +9,8 @@ public class Message implements Serializable {
 	
 	/**
 	 *  constructor that gets the information of message and sets all attribute to new values
-	 * @param content 
-	 * @param command
+	 * @param content content of message
+	 * @param command command of message
 	 */
 	public Message(Object content, Command command) {
 		this.content = content;
@@ -27,7 +27,7 @@ public class Message implements Serializable {
 	
 	/**
 	 * Sets content
-	 * @param content
+	 * @param content contents from message
 	 */
 	public void setContent(Object content) {
 		this.content = content;
@@ -43,7 +43,7 @@ public class Message implements Serializable {
 	
 	/**
 	 * Sets command
-	 * @param command
+	 * @param command command of message
 	 */
 	public void setCommand(Command command) {
 		this.command = command;

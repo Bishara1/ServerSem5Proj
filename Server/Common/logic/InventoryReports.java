@@ -153,7 +153,7 @@ public class InventoryReports implements Serializable {
 
 	/**
 	 * Sets report id
-	 * @param report_id
+	 * @param report_id report id
 	 */
 	public void setReport_id(int report_id) {
 		this.report_id = report_id;
@@ -168,7 +168,7 @@ public class InventoryReports implements Serializable {
 
 	/**
 	 * Sets machine id
-	 * @param machine_id
+	 * @param machine_id machine id
 	 */
 	public void setMachine_id(int machine_id) {
 		this.machine_id = machine_id;
@@ -182,5 +182,16 @@ public class InventoryReports implements Serializable {
 		return "InventoryReports [location=" + location + ", stock=" + stock + ", month=" + month + ", year=" + year
 				+ ", report_id=" + report_id + ", machine_id=" + machine_id + "]";
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		InventoryReports temp = (InventoryReports)obj;
+		return (temp.getInventory().equals(this.inventory) && temp.getLocation().equals(this.location) && temp.getMachine_id() == this.machine_id &&
+				temp.getMonth().equals(this.month) && temp.getReport_id() == this.report_id 
+				&& temp.getStock().equals(this.stock) && temp.getYear().equals(this.year));
+				
+	}
+	
+	
 	
 }

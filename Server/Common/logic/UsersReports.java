@@ -59,7 +59,7 @@ public class UsersReports implements Serializable{
 	
 	/**
 	 * Sets report id
-	 * @param report_id
+	 * @param report_id reports_id
 	 */
 	public void setReport_id(int report_id) {
 		this.report_id = report_id;
